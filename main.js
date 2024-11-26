@@ -15,6 +15,10 @@ app.use(app2);
 const app3 = require('./Register');
 app.use(app3);
 
+const app4 = require('./Webcounter');
+app.use(app4);
+
+
 // เรียก app.listen เพียงครั้งเดียว
 app.listen(6000, () => {
     console.log('Server is running on port 6000');
