@@ -34,7 +34,7 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-// Handle registration
+
 app.post('/Register',
     [
         // Validation middleware
