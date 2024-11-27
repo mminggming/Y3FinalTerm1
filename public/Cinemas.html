@@ -8,6 +8,57 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="public/css/main.css" />
+
+    <style>
+        /* ปรับขนาดปุ่มเลื่อนและตำแหน่งให้อยู่ตรงกลาง */
+        .carousel-control-prev-icon, .carousel-control-next-icon {
+            background-color: rgba(0, 0, 0, 0.5); /* สีเทาอ่อน */
+            width: 30px; /* ขนาดเล็กลง */
+            height: 30px; /* ขนาดเล็กลง */
+            border-radius: 50%; /* รูปทรงกลม */
+        }
+
+        .carousel-control-prev, .carousel-control-next {
+            z-index: 1;
+            background-color: rgba(0, 0, 0, 0.3); /* สีพื้นหลังของปุ่ม */
+            border-radius: 50%; /* ขอบปุ่มเป็นรูปวงกลม */
+            width: 40px; /* ขนาดปุ่มเลื่อน */
+            height: 40px; /* ขนาดปุ่มเลื่อน */
+            opacity: 0.7; /* ความโปร่งใส */
+            position: absolute; /* ให้ปุ่มเลื่อนอยู่ในตำแหน่งที่กำหนด */
+            top: 50%; /* จัดตำแหน่งแนวตั้งตรงกลาง */
+            transform: translateY(-50%); /* เลื่อนขึ้นเพื่อให้ตรงกลางแนวตั้ง */
+        }
+
+        .carousel-control-prev {
+            left: 10px; /* ปรับให้ปุ่ม prev อยู่ทางซ้าย */
+        }
+
+        .carousel-control-next {
+            right: 10px; /* ปรับให้ปุ่ม next อยู่ทางขวา */
+        }
+
+        .carousel-control-prev:hover, .carousel-control-next:hover {
+            opacity: 1; /* ความโปร่งใสเมื่อโฮเวอร์ */
+        }
+
+        /* ให้ card มีขนาดกว้างเต็มพื้นที่ */
+        .card {
+            width: 100%;
+        }
+
+        /* ให้ card อยู่ตรงกลาง */
+        .carousel-inner .row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ให้ carousel มีตำแหน่ง relative เพื่อจัดตำแหน่งปุ่ม */
+        .carousel {
+            position: relative;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -57,186 +108,216 @@
         </div>
     </header>
 
-   <!-- Primary -->
-<div class="btn-group">
-  <button type="button" class="btn btn-primary dropdown-toggle" data-mdb-dropdown-init data-mdb-ripple-init aria-expanded="false">
-    Action
-  </button>
-  <ul class="dropdown-menu">
-    <li><a class="dropdown-item" href="#">Action</a></li>
-    <li><a class="dropdown-item" href="#">Another action</a></li>
-    <li><a class="dropdown-item" href="#">Something else here</a></li>
-    <li><hr class="dropdown-divider" /></li>
-    <li><a class="dropdown-item" href="#">Separated link</a></li>
-  </ul>
-</div>
 
-<!-- Secondary -->
-<div class="btn-group">
-  <button type="button" class="btn btn-secondary dropdown-toggle" data-mdb-dropdown-init data-mdb-ripple-init aria-expanded="false">
-    Action
-  </button>
-  <ul class="dropdown-menu">
-    <li><a class="dropdown-item" href="#">Action</a></li>
-    <li><a class="dropdown-item" href="#">Another action</a></li>
-    <li><a class="dropdown-item" href="#">Something else here</a></li>
-    <li><hr class="dropdown-divider" /></li>
-    <li><a class="dropdown-item" href="#">Separated link</a></li>
-  </ul>
-</div>
-
-<!-- Success -->
-<div class="btn-group">
-  <button type="button" class="btn btn-success dropdown-toggle" data-mdb-dropdown-init data-mdb-ripple-init aria-expanded="false">
-    Action
-  </button>
-  <ul class="dropdown-menu">
-    <li><a class="dropdown-item" href="#">Action</a></li>
-    <li><a class="dropdown-item" href="#">Another action</a></li>
-    <li><a class="dropdown-item" href="#">Something else here</a></li>
-    <li><hr class="dropdown-divider" /></li>
-    <li><a class="dropdown-item" href="#">Separated link</a></li>
-  </ul>
-</div>
-
-<!-- Info -->
-<div class="btn-group">
-  <button type="button" class="btn btn-info dropdown-toggle" data-mdb-dropdown-init data-mdb-ripple-init aria-expanded="false">
-    Action
-  </button>
-  <ul class="dropdown-menu">
-    <li><a class="dropdown-item" href="#">Action</a></li>
-    <li><a class="dropdown-item" href="#">Another action</a></li>
-    <li><a class="dropdown-item" href="#">Something else here</a></li>
-    <li><hr class="dropdown-divider" /></li>
-    <li><a class="dropdown-item" href="#">Separated link</a></li>
-  </ul>
-</div>
-
-<!-- Warning -->
-<div class="btn-group">
-  <button type="button" class="btn btn-warning dropdown-toggle" data-mdb-dropdown-init data-mdb-ripple-init aria-expanded="false">
-    Action
-  </button>
-  <ul class="dropdown-menu">
-    <li><a class="dropdown-item" href="#">Action</a></li>
-    <li><a class="dropdown-item" href="#">Another action</a></li>
-    <li><a class="dropdown-item" href="#">Something else here</a></li>
-    <li><hr class="dropdown-divider" /></li>
-    <li><a class="dropdown-item" href="#">Separated link</a></li>
-  </ul>
-</div>
-
-<!-- Danger -->
-<div class="btn-group">
-  <button type="button" class="btn btn-danger dropdown-toggle" data-mdb-dropdown-init data-mdb-ripple-init aria-expanded="false">
-    Action
-  </button>
-  <ul class="dropdown-menu">
-    <li><a class="dropdown-item" href="#">Action</a></li>
-    <li><a class="dropdown-item" href="#">Another action</a></li>
-    <li><a class="dropdown-item" href="#">Something else here</a></li>
-    <li><hr class="dropdown-divider" /></li>
-    <li><a class="dropdown-item" href="#">Separated link</a></li>
-  </ul>
-</div>
-
-<!-- Dark -->
-<div class="btn-group">
-  <button type="button" class="btn btn-dark dropdown-toggle" data-mdb-dropdown-init data-mdb-ripple-init aria-expanded="false">
-    Action
-  </button>
-  <ul class="dropdown-menu">
-    <li><a class="dropdown-item" href="#">Action</a></li>
-    <li><a class="dropdown-item" href="#">Another action</a></li>
-    <li><a class="dropdown-item" href="#">Something else here</a></li>
-    <li><hr class="dropdown-divider" /></li>
-    <li><a class="dropdown-item" href="#">Separated link</a></li>
-  </ul>
-</div>
 
 <br><br><br><br>
 
 <h1>สาขา</h1>
 <h3>กรุงเทพและปริมณฑล</h3>
 
-<div class="container text-center mt-5">
-    <div class="row">
-    <div class="col">
-<div class="card" style="width: 18rem;">
-    <img src="..." class="card-img-top" alt="...">
-    <div class="card-body">
-      <h5 class="card-title">เอ็มพรีเว่ ซีเนคลับ เอ็มโพเรียม</h5>
-      <p class="card-text">สุนทรียะบันเทิงเหนือระดับ กับ CINECLUB แห่งแรกในเมืองไทย  ที่สุดโรงภาพยนตร์หรูหราระดับเวิลด์คลาส โดดเด่นด้วยดีไซน์ และความสะดวกสบายสุด Exclusive พร้อมบริการระดับ 6 ดาว </p>
-    </div>
-    <ul class="list-group list-group-flush">
-      <li class="list-group-item">โทร: 1349</li>
-      <li class="list-group-item">5th FL. The Emporium</li>
-      <li class="list-group-item">10:00 - 22:00 ทุกวัน</li>
-    </ul>
-    <div class="card-body">
-      <a href="#" class="card-link">map</a>
-      <a href="#" class="card-link">Another link</a>
-    </div>
-  </div>
-    </div>
-    <div class="col">
-        <div class="card" style="width: 18rem;">
-            <img src="..." class="card-img-top" alt="...">
-            <div class="card-body">
-              <h5 class="card-title">เอ็มพรีเว่ ซีเนคลับ เอ็มโพเรียม</h5>
-              <p class="card-text">สุนทรียะบันเทิงเหนือระดับ กับ CINECLUB แห่งแรกในเมืองไทย  ที่สุดโรงภาพยนตร์หรูหราระดับเวิลด์คลาส โดดเด่นด้วยดีไซน์ และความสะดวกสบายสุด Exclusive พร้อมบริการระดับ 6 ดาว </p>
-            </div>
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item">โทร: 1349</li>
-              <li class="list-group-item">5th FL. The Emporium</li>
-              <li class="list-group-item">10:00 - 22:00 ทุกวัน</li>
-            </ul>
-            <div class="card-body">
-              <a href="#" class="card-link">map</a>
-              <a href="#" class="card-link">Another link</a>
-            </div>
-          </div>
-            </div>
-            <div class="col">
-                <div class="card" style="width: 18rem;">
-                    <img src="..." class="card-img-top" alt="...">
-                    <div class="card-body">
-                      <h5 class="card-title">เอ็มพรีเว่ ซีเนคลับ เอ็มโพเรียม</h5>
-                      <p class="card-text">สุนทรียะบันเทิงเหนือระดับ กับ CINECLUB แห่งแรกในเมืองไทย  ที่สุดโรงภาพยนตร์หรูหราระดับเวิลด์คลาส โดดเด่นด้วยดีไซน์ และความสะดวกสบายสุด Exclusive พร้อมบริการระดับ 6 ดาว </p>
-                    </div>
-                    <ul class="list-group list-group-flush">
-                      <li class="list-group-item">โทร: 1349</li>
-                      <li class="list-group-item">5th FL. The Emporium</li>
-                      <li class="list-group-item">10:00 - 22:00 ทุกวัน</li>
-                    </ul>
-                    <div class="card-body">
-                      <a href="#" class="card-link">map</a>
-                      <a href="#" class="card-link">Another link</a>
-                    </div>
-                  </div>
-                    </div>
-                    <div class="col">
-                        <div class="card" style="width: 18rem;">
-                            <img src="..." class="card-img-top" alt="...">
-                            <div class="card-body">
-                              <h5 class="card-title">เอ็มพรีเว่ ซีเนคลับ เอ็มโพเรียม</h5>
-                              <p class="card-text">สุนทรียะบันเทิงเหนือระดับ กับ CINECLUB แห่งแรกในเมืองไทย  ที่สุดโรงภาพยนตร์หรูหราระดับเวิลด์คลาส โดดเด่นด้วยดีไซน์ และความสะดวกสบายสุด Exclusive พร้อมบริการระดับ 6 ดาว </p>
+<section class="knowmore">
+    <div id="servicesCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <!-- Slide 1 -->
+            <div class="carousel-item active">
+                <div class="container text-center mt-5">
+                    <div class="row">
+                        <div class="col">
+                            <div class="card" style="width: 18rem;">
+                                <img src="..." class="card-img-top" alt="...">
+                                <div class="card-body">
+                                    <h5 class="card-title">เอ็มพรีเว่ ซีเนคลับ เอ็มโพเรียม</h5>
+                                    <p class="card-text">สุนทรียะบันเทิงเหนือระดับ กับ CINECLUB แห่งแรกในเมืองไทย  ที่สุดโรงภาพยนตร์หรูหราระดับเวิลด์คลาส โดดเด่นด้วยดีไซน์ และความสะดวกสบายสุด Exclusive พร้อมบริการระดับ 6 ดาว </p>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">โทร: 1349</li>
+                                    <li class="list-group-item">5th FL. The Emporium</li>
+                                    <li class="list-group-item">10:00 - 22:00 ทุกวัน</li>
+                                </ul>
+                                <div class="card-body">
+                                    <a href="#" class="card-link">map</a>
+                                    <a href="#" class="card-link">Another link</a>
+                                </div>
                             </div>
-                            <ul class="list-group list-group-flush">
-                              <li class="list-group-item">โทร: 1349</li>
-                              <li class="list-group-item">5th FL. The Emporium</li>
-                              <li class="list-group-item">10:00 - 22:00 ทุกวัน</li>
-                            </ul>
-                            <div class="card-body">
-                              <a href="#" class="card-link">map</a>
-                              <a href="#" class="card-link">Another link</a>
+                        </div>
+                        <div class="col">
+                            <div class="card" style="width: 18rem;">
+                                <img src="..." class="card-img-top" alt="...">
+                                <div class="card-body">
+                                    <h5 class="card-title">เอส เอฟ เวิลด์ ซีเนม่า เซ็นทรัลเวิลด์</h5>
+                                    <p class="card-text">ล้ำโลกภาพยนตร์ กับโรงภาพยนตร์ Flagship ด้วยจำนวนโรงและความพิเศษหลากหลาย รองรับทุกไลฟ์สไตล์บันเทิง สำหรับคนรุ่นใหม่ที่ชอบความทันสมัยไม่ซ้ำใคร</p>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">โทร: 1349</li>
+                                    <li class="list-group-item">7th FL. CentralWorld</li>
+                                    <li class="list-group-item">จ - พฤ 10:30 - 21:30 / ศ - อา 10:00 - 22:00</li>
+                                </ul>
+                                <div class="card-body">
+                                    <a href="#" class="card-link">map</a>
+                                    <a href="#" class="card-link">Another link</a>
+                                </div>
                             </div>
-                          </div>
+                        </div>
+                        <div class="col">
+                            <div class="card" style="width: 18rem;">
+                                <img src="..." class="card-img-top" alt="...">
+                                <div class="card-body">
+                                    <h5 class="card-title">เอส เอฟ เอ็กซ์ ซีเนม่า เซ็นทรัล พระราม 9</h5>
+                                    <p class="card-text">บันเทิงศิลป์ชิ้นเอกแห่งโลกภาพยนตร์ระดับเวิลด์คลาส หรูหราด้วยดีไซน์ Luxury Concept พร้อมบริการสุดพิเศษแบบ First Class เพื่อมอบประสบการณ์ชมภาพยนตร์สมบูรณ์แบบที่ดีที่สุด</p>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">โทร: 1349</li>
+                                    <li class="list-group-item">7th FL. Central Grand Rama IX</li>
+                                    <li class="list-group-item">10:00 - 22:00 ทุกวัน</li>
+                                </ul>
+                                <div class="card-body">
+                                    <a href="#" class="card-link">map</a>
+                                    <a href="#" class="card-link">Another link</a>
+                                </div>
                             </div>
-    </div>
-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            <!-- Slide 2 -->
+            <div class="carousel-item">
+                <div class="container text-center mt-5">
+                    <div class="row">
+                        <div class="col">
+                            <div class="card" style="width: 18rem;">
+                                <img src="..." class="card-img-top" alt="...">
+                                <div class="card-body">
+                                    <h5 class="card-title">เอส เอฟ เอ็กซ์ ซีเนม่า เซ็นทรัล ลาดพร้าว</h5>
+                                    <p class="card-text">บันเทิงอีกระดับ กับที่สุดโรงภาพยนตร์ระดับเวิลด์คลาส หรูหราด้วยดีไซน์ Luxury Concept พร้อมบริการสุดพิเศษแบบ First Class และที่สุดของความสบายแบบ The Bed Cinema by Omazz®  เพื่อมอบประสบการณ์ชมภาพยนตร์สมบูรณ์แบบที่ดีที่สุด</p>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">โทร: 1349</li>
+                                    <li class="list-group-item">6th FL. Central Ladprao</li>
+                                    <li class="list-group-item">จ - พฤ 10:00 - 23:00 / ศ - อา และวันหยุดนักขัตฤกษ์ 10:00 - 23:50</li>
+                                </ul>
+                                <div class="card-body">
+                                    <a href="#" class="card-link">map</a>
+                                    <a href="#" class="card-link">Another link</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card" style="width: 18rem;">
+                                <img src="..." class="card-img-top" alt="...">
+                                <div class="card-body">
+                                    <h5 class="card-title">เอส เอฟ เอ็กซ์ ซีเนม่า เซ็นทรัล รามอินทรา</h5>
+                                    <p class="card-text">โรงภาพยนตร์แห่งใหม่ล่าสุดที่ได้รับการออกแบบเพื่อให้ประสบการณ์การชมภาพยนตร์ที่ทันสมัยและสบายที่สุด ด้วยเทคโนโลยีการแสดงภาพระดับสูงและบริการพิเศษที่รองรับทุกความต้องการของผู้ชม</p>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">โทร: 1349</li>
+                                    <li class="list-group-item">5th FL. Central Ramindra</li>
+                                    <li class="list-group-item">10:00 - 22:00 ทุกวัน</li>
+                                </ul>
+                                <div class="card-body">
+                                    <a href="#" class="card-link">map</a>
+                                    <a href="#" class="card-link">Another link</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card" style="width: 18rem;">
+                                <img src="..." class="card-img-top" alt="...">
+                                <div class="card-body">
+                                    <h5 class="card-title">เอส เอฟ เอ็กซ์ ซีเนม่า สยาม</h5>
+                                    <p class="card-text">สัมผัสประสบการณ์ภาพยนตร์ที่สมบูรณ์แบบที่โรงภาพยนตร์หรูหรา พร้อมการบริการระดับพรีเมียมและการตกแต่งภายในที่ทันสมัยเพื่อให้คุณได้ดื่มด่ำไปกับความบันเทิงอย่างเต็มที่</p>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">โทร: 1349</li>
+                                    <li class="list-group-item">3rd FL. Siam Paragon</li>
+                                    <li class="list-group-item">10:00 - 22:00 ทุกวัน</li>
+                                </ul>
+                                <div class="card-body">
+                                    <a href="#" class="card-link">map</a>
+                                    <a href="#" class="card-link">Another link</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="carousel-item">
+                <div class="container text-center mt-5">
+                    <div class="row">
+                        <div class="col">
+                            <div class="card" style="width: 18rem;">
+                                <img src="..." class="card-img-top" alt="...">
+                                <div class="card-body">
+                                    <h5 class="card-title">เอส เอฟ เอ็กซ์ ซีเนม่า เซ็นทรัล เฟสติวัล พัทยา</h5>
+                                    <p class="card-text">โรงภาพยนตร์หรูหราในพัทยา มอบประสบการณ์การชมภาพยนตร์ที่ไม่เหมือนใครพร้อมการบริการที่ดีที่สุดในจังหวัดพัทยา</p>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">โทร: 1349</li>
+                                    <li class="list-group-item">5th FL. Central Festival Pattaya</li>
+                                    <li class="list-group-item">จ - พฤ 10:00 - 22:00 / ศ - อา 10:00 - 23:00</li>
+                                </ul>
+                                <div class="card-body">
+                                    <a href="#" class="card-link">map</a>
+                                    <a href="#" class="card-link">Another link</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card" style="width: 18rem;">
+                                <img src="..." class="card-img-top" alt="...">
+                                <div class="card-body">
+                                    <h5 class="card-title">เอส เอฟ เอ็กซ์ ซีเนม่า เซ็นทรัล ปิ่นเกล้า</h5>
+                                    <p class="card-text">แหล่งบันเทิงใจกลางปิ่นเกล้า เชิญสัมผัสความสนุกด้วยโรงภาพยนตร์ที่ทันสมัย พร้อมบริการระดับพรีเมียม เพื่อประสบการณ์การชมภาพยนตร์อย่างเต็มที่</p>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">โทร: 1349</li>
+                                    <li class="list-group-item">6th FL. Central Pinklao</li>
+                                    <li class="list-group-item">จ - อา 10:00 - 22:00</li>
+                                </ul>
+                                <div class="card-body">
+                                    <a href="#" class="card-link">map</a>
+                                    <a href="#" class="card-link">Another link</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card" style="width: 18rem;">
+                                <img src="..." class="card-img-top" alt="...">
+                                <div class="card-body">
+                                    <h5 class="card-title">เอส เอฟ เอ็กซ์ ซีเนม่า เซ็นทรัล พระราม 3</h5>
+                                    <p class="card-text">โรงภาพยนตร์ที่ให้บริการเต็มรูปแบบ พร้อมที่สุดของภาพยนตร์และบริการที่มีคุณภาพ สำหรับทุกคนในครอบครัว</p>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">โทร: 1349</li>
+                                    <li class="list-group-item">7th FL. Central Rama 3</li>
+                                    <li class="list-group-item">10:00 - 22:00 ทุกวัน</li>
+                                </ul>
+                                <div class="card-body">
+                                    <a href="#" class="card-link">map</a>
+                                    <a href="#" class="card-link">Another link</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#servicesCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#servicesCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+</section>
+
+    
   
     </body>
 </html>
