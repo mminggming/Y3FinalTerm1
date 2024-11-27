@@ -47,3 +47,14 @@
     font-weight: bold;
 }
 
+
+
+
+.navbar-toggler-icon {
+    background-color: #fff;
+}
+
+.nav-item .nav-link.active {
+    color: #00bcd4;
+    font-weight: bold;
+}
