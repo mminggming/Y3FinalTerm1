@@ -8,26 +8,23 @@ const { check, validationResult } = require('express-validator'); // Validation
 const app = express();
 const PORT = 3000;
 
-// Middleware
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
-// Serve static files from the 'public' directory
 app.use(express.static('public'));
 
-// Use express-session middleware to handle user sessions
+
 app.use(session({
-    secret: 'secretKey', // Replace with a more secure secret in production
+    secret: 'secretKey', 
     resave: false,
     saveUninitialized: true,
 }));
 
-// Redirect root URL ('/') to the login page
 app.get('/', (req, res) => {
-    res.redirect('/Login'); // Redirects to the login route
+    res.redirect('/Login'); 
 });
 
-// Define routes for specific pages
+
 app.get('/Login', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/Login.html'));
 });
@@ -37,40 +34,41 @@ app.get('/Register', (req, res) => {
 });
 
 app.get('/Home', (req, res) => {
+    console.log("User Session:", req.session.user); // Debugging line
     if (!req.session.user) {
         return res.redirect('/Login?alert=not-logged-in');
     }
     res.sendFile(path.join(__dirname, 'public/Home.html'));
 });
 
-// Include routes from external files
+
+
 const app1 = require('./ForgotPass');
 app.use('/ForgotPass', app1);
 
 const app2 = require('./Login');
 app.use('/Login', app2);
 
-const app3 = require('./Register'); // Dynamic logic for registration
-app.use('/api/Register', app3); // Use '/api/Register' for dynamic registration logic
+const app3 = require('./Register'); 
+app.use('/api/Register', app3);
 
 const app4 = require('./Webcounter');
 app.use('/Webcounter', app4);
 
-// Start the server
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 
-// Connect to MongoDB
-mongoose.connect('mongodb+srv://mminggming:mingming13@mmingg.dlq3d.mongodb.net/')
+//MongoDB
+mongoose.connect('mongodb+srv://mminggming:mingming13@mmingg.dlq3d.mongodb.net/USERDATA')
 .then(() => {
-    console.log("Connected to MongoDB");
+    console.log("Connected to MongoDB/USERDATA");
 })
 .catch(err => {
     console.error("MongoDB connection error:", err);
 });
 
-// Define User schema and model (avoid overwriting)
 const userSchema = new mongoose.Schema({
     Name: String,
     Surname: String,
@@ -80,14 +78,13 @@ const userSchema = new mongoose.Schema({
     Phone: String,
     Username: { type: String, unique: true },
     Password: String,
-});
+}, { collection: 'Register' });
 
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 
-// Handle registration route with validation
-app.post('/Register',
-    // Validation middleware
-    [
+
+app.post('/Register', [
+
         check('Name').notEmpty().withMessage('Name is required'),
         check('Surname').notEmpty().withMessage('Surname is required'),
         check('Email').isEmail().withMessage('Invalid email address'),
@@ -104,7 +101,6 @@ app.post('/Register',
             .withMessage('Username is required')
     ],
     async (req, res) => {
-        // Handle validation errors
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
@@ -141,7 +137,6 @@ app.post('/Register',
         } catch (error) {
             console.error("Error details:", error);
 
-            // Handle potential MongoDB validation errors (e.g., unique constraint violations)
             if (error.code === 11000) {
                 return res.status(400).json({ message: "Email or Username already exists." });
             } else {
@@ -151,29 +146,25 @@ app.post('/Register',
     }
 );
 
-// Handle login route
 app.post('/Login', async (req, res) => {
     const { username, password } = req.body;
 
     try {
-        // Check if user exists with the provided username
+
         const user = await User.findOne({ Username: username });
 
         if (!user) {
             return res.status(400).json({ message: 'Invalid username or password' });
         }
 
-        // Compare entered password with stored hashed password
         const isMatch = await bcrypt.compare(password, user.Password);
 
         if (!isMatch) {
             return res.status(400).json({ message: 'Invalid username or password' });
         }
 
-        // Store user session
         req.session.user = user;
 
-        // Redirect to home page or any protected route
         res.redirect('/Home');
     } catch (error) {
         console.error(error);
@@ -181,7 +172,6 @@ app.post('/Login', async (req, res) => {
     }
 });
 
-// Logout route to destroy the session
 app.get('/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
