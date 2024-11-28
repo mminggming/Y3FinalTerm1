@@ -34,7 +34,7 @@
             padding: 80px 0;
         }
         .theater {
-            width: 800px;
+            width: 600px;
             min-height: 700px;
             background: var(--background, #ffffff);
             border-radius: 20px;
@@ -100,6 +100,21 @@
         .seat.front {
             background: #2dcff8; /* Lighter color for front seats */
         }
+        .receipt-container {
+            width: 210px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 100px;
+            right: 20px;
+        }
+        .movie-poster {
+            width: 90%;
+            height: auto;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -129,7 +144,6 @@
     </header>
 
     <br><br><br>
-    <div id="root"></div>
 
     <div class="theater-container">
         <div class="theater">
@@ -147,6 +161,169 @@
         </div>
     </div>
 
+    <div class="receipt-container">
+        <h5>Booking Summary</h5>
+        <div class="movie-info">
+            <img src="./images/wicked.jpeg" alt="Movie Poster" class="movie-poster">
+            <p><strong>Movie:</strong> Wicked </p>
+            <p><strong>Time:</strong> 18:30</p>
+            <p><strong>Location:</strong> Theater 5</p>
+        </div>
+        <div id="seatDetails">
+            <p><strong>Seats:</strong></p>
+            <ul id="selectedSeatsList"></ul>
+            <p><strong>Total Price:</strong> <span id="receiptTotalPrice">0</span> THB</p>
+        </div>
+        <button id="purchaseTicket" class="btn btn-success mt-3">Purchase Ticket</button>
+    </div>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const seatsContainer = document.getElementById("seatsContainer");
+            const confirmButton = document.getElementById("confirmBooking");
+            const totalPriceDisplay = document.getElementById("totalPrice");
+            const selectedSeatsList = document.getElementById("selectedSeatsList");
+            const receiptTotalPrice = document.getElementById("receiptTotalPrice");
+    
+            const frontSeatPrice = 240;
+            const backSeatPrice = 260;
+    
+            for (let i = 0; i < 100; i++) {
+                const seat = document.createElement("div");
+                seat.classList.add("seat");
+    
+                const column = i % 10;
+                
+                if (column === 4 || column === 5) {
+                    seat.classList.add("aisle");
+                    seat.style.backgroundColor = "lightgray";
+                    seat.style.pointerEvents = "none";
+                } else if (i < 50) {
+                    seat.classList.add("front");
+                    seat.dataset.price = frontSeatPrice;
+                    seat.dataset.row = Math.floor(i / 10) + 1;
+                    seat.dataset.seat = (i % 10) + 1;
+                } else {
+                    seat.classList.add("back");
+                    seat.dataset.price = backSeatPrice;
+                    seat.dataset.row = Math.floor(i / 10) + 1;
+                    seat.dataset.seat = (i % 10) + 1;
+                }
+    
+                if (i % 5 === 0 && !seat.classList.contains("aisle")) {
+                    seat.classList.add("reserved");
+                } else if (!seat.classList.contains("aisle")) {
+                    seat.classList.add("available");
+                    seat.addEventListener("click", () => toggleSeatSelection(seat));
+                }
+    
+                seatsContainer.appendChild(seat);
+            }
+    
+            confirmButton.addEventListener("click", () => {
+                const selectedSeats = Array.from(document.querySelectorAll(".seat.selected"));
+                if (selectedSeats.length === 0) {
+                    alert("No seats selected. Please select at least one seat.");
+                } else {
+                    alert("Seats booked successfully!");
+                }
+            });
+    
+            function toggleSeatSelection(seat) {
+                if (seat.classList.contains("available")) {
+                    seat.classList.remove("available");
+                    seat.classList.add("selected");
+                    seat.style.backgroundColor = "red";
+                } else if (seat.classList.contains("selected")) {
+                    seat.classList.remove("selected");
+                    seat.classList.add("available");
+                    seat.style.backgroundColor = "";
+                }
+                updateBookingSummary();
+            }
+    
+            function updateBookingSummary() {
+                const selectedSeats = document.querySelectorAll(".seat.selected");
+                selectedSeatsList.innerHTML = '';
+                let totalPrice = 0;
+    
+                selectedSeats.forEach(seat => {
+                    const row = seat.dataset.row;
+                    const seatNumber = seat.dataset.seat;
+                    totalPrice += parseInt(seat.dataset.price);
+    
+                    const seatItem = document.createElement("li");
+                    seatItem.textContent = `Row: ${row}, Seat: ${seatNumber}`;
+                    selectedSeatsList.appendChild(seatItem);
+                });
+    
+                totalPriceDisplay.textContent = totalPrice;
+                receiptTotalPrice.textContent = totalPrice;
+            }
+        });
+
+        //receipt
+        document.addEventListener("DOMContentLoaded", () => {
+    const purchaseButton = document.getElementById("purchaseTicket");
+    const modalSeatList = document.getElementById("modalSeatList");
+    const modalTotalPrice = document.getElementById("modalTotalPrice");
+
+    purchaseButton.addEventListener("click", () => {
+        const selectedSeats = document.querySelectorAll(".seat.selected");
+        if (selectedSeats.length === 0) {
+            alert("No seats selected. Please select at least one seat.");
+            return;
+        }
+
+        // Clear old seat details
+        modalSeatList.innerHTML = '';
+        let total = 0;
+
+        // Update modal with selected seats and price
+        selectedSeats.forEach(seat => {
+            const row = seat.dataset.row;
+            const seatNumber = seat.dataset.seat;
+            const price = seat.dataset.price;
+            total += parseInt(price);
+
+            const listItem = document.createElement("li");
+            listItem.textContent = `Row: ${row}, Seat: ${seatNumber}`;
+            modalSeatList.appendChild(listItem);
+        });
+
+        modalTotalPrice.textContent = total;
+        const modal = new bootstrap.Modal(document.getElementById('ticketModal'));
+        modal.show();
+    });
+    });
+    </script> 
+    
+    <div class="modal fade" id="ticketModal" tabindex="-1" aria-labelledby="ticketModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ticketModalLabel">Ticket Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Movie:</strong> Wicked</p>
+                    <p><strong>Time:</strong> 18:30</p>
+                    <p><strong>Location:</strong> Theater 5</p>
+                    <p><strong>Seats:</strong></p>
+                    <ul id="modalSeatList"></ul>
+                    <p><strong>Total Price:</strong> <span id="modalTotalPrice">0</span> THB</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    
     <br>  
     <footer
             class="text-center text-lg-start text-white"
@@ -284,79 +461,6 @@
       </div>
       <!-- Copyright -->
     </footer>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const seatsContainer = document.getElementById("seatsContainer");
-            const confirmButton = document.getElementById("confirmBooking");
-            const totalPriceDisplay = document.getElementById("totalPrice");
-    
-            const frontSeatPrice = 240;
-            const backSeatPrice = 260;
-    
-            for (let i = 0; i < 100; i++) {
-                const seat = document.createElement("div");
-                seat.classList.add("seat");
-    
-                // คำนวณแถวและคอลัมน์ใน Grid 10x10
-                const column = i % 10;
-                
-                if (column === 4 || column === 5) {
-                    // คอลัมน์ที่ 5 และ 6 (column index 4 และ 5)
-                    seat.classList.add("aisle");
-                    seat.style.backgroundColor = "lightgray";
-                    seat.style.pointerEvents = "none"; // ทำให้กดไม่ได้
-                } else if (i < 50) {
-                    seat.classList.add("front");
-                    seat.dataset.price = frontSeatPrice;
-                } else {
-                    seat.classList.add("back");
-                    seat.dataset.price = backSeatPrice;
-                }
-    
-                if (i % 5 === 0 && !seat.classList.contains("aisle")) {
-                    seat.classList.add("reserved");
-                } else if (!seat.classList.contains("aisle")) {
-                    seat.classList.add("available");
-                    seat.addEventListener("click", () => toggleSeatSelection(seat));
-                }
-    
-                seatsContainer.appendChild(seat);
-            }
-    
-            confirmButton.addEventListener("click", () => {
-                const selectedSeats = Array.from(document.querySelectorAll(".seat.selected"));
-                if (selectedSeats.length === 0) {
-                    alert("No seats selected. Please select at least one seat.");
-                } else {
-                    alert("Seats booked successfully!");
-                }
-            });
-    
-            function toggleSeatSelection(seat) {
-                if (seat.classList.contains("available")) {
-                    seat.classList.remove("available");
-                    seat.classList.add("selected");
-                    seat.style.backgroundColor = "red"; // เปลี่ยนสีแดงเมื่อเลือก
-                } else if (seat.classList.contains("selected")) {
-                    seat.classList.remove("selected");
-                    seat.classList.add("available");
-                    seat.style.backgroundColor = ""; // คืนสีเดิมตามคลาส
-                }
-                updateTotalPrice();
-            }
-    
-            function updateTotalPrice() {
-                const selectedSeats = document.querySelectorAll(".seat.selected");
-                let totalPrice = 0;
-                selectedSeats.forEach(seat => {
-                    totalPrice += parseInt(seat.dataset.price);
-                });
-                totalPriceDisplay.textContent = totalPrice;
-            }
-        });
-    </script>
-    
     
 </body>
 </html>

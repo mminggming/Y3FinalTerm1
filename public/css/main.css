@@ -73,31 +73,30 @@
     padding: 10px;
     margin-top: 50px;
   }
-
-
-  * {
-    box-sizing: border-box;
-    padding: 0;
-    margin: 0;
-  }
-  body {
-    min-height: 100vh;
-    background: linear-gradient(#fae6e1, #f3dfd8);
-    font-family: "Lato", sans-serif;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    --color: #2c2f62;
-    --background: #ffffff;
-    --accent: #fd6d8e;
-  }
-  .available {
-    color: #2dcff8;
-  }
-  .reserved {
-    color: hsl(0, 0%, 95%);
-  }
-  .selected {
-    color: var(--accent, #fd6d8e);
-  }
   
+/*   
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+ }
+ 
+ .modal-content {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    width: 300px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+ }
+ 
+ .modal.hidden {
+    display: none;
+ }
+  */
