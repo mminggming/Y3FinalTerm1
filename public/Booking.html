@@ -298,15 +298,25 @@
                 const seat = document.createElement("div");
                 seat.classList.add("seat");
     
-                if (i < 50) {
+                // คำนวณแถวและคอลัมน์ใน Grid 10x10
+                const column = i % 10;
+                
+                if (column === 4 || column === 5) {
+                    // คอลัมน์ที่ 5 และ 6 (column index 4 และ 5)
+                    seat.classList.add("aisle");
+                    seat.style.backgroundColor = "lightgray";
+                    seat.style.pointerEvents = "none"; // ทำให้กดไม่ได้
+                } else if (i < 50) {
                     seat.classList.add("front");
+                    seat.dataset.price = frontSeatPrice;
                 } else {
                     seat.classList.add("back");
+                    seat.dataset.price = backSeatPrice;
                 }
     
-                if (i % 5 === 0) {
+                if (i % 5 === 0 && !seat.classList.contains("aisle")) {
                     seat.classList.add("reserved");
-                } else {
+                } else if (!seat.classList.contains("aisle")) {
                     seat.classList.add("available");
                     seat.addEventListener("click", () => toggleSeatSelection(seat));
                 }
@@ -340,16 +350,13 @@
                 const selectedSeats = document.querySelectorAll(".seat.selected");
                 let totalPrice = 0;
                 selectedSeats.forEach(seat => {
-                    if (seat.classList.contains("front")) {
-                        totalPrice += frontSeatPrice;
-                    } else {
-                        totalPrice += backSeatPrice;
-                    }
+                    totalPrice += parseInt(seat.dataset.price);
                 });
                 totalPriceDisplay.textContent = totalPrice;
             }
         });
-    </script>    
+    </script>
+    
     
 </body>
 </html>
