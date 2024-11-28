@@ -3,6 +3,7 @@ const path = require('path'); // To work with file paths
 const bodyParser = require('body-parser'); // To parse request bodies
 const mongoose = require('mongoose'); // MongoDB integration
 const bcrypt = require('bcrypt');
+const session = require('express-session'); // Session handling
 const { check, validationResult } = require('express-validator'); // Validation
 const app = express();
 const PORT = 3000;
@@ -13,6 +14,13 @@ app.use(bodyParser.json());
 
 // Serve static files from the 'public' directory
 app.use(express.static('public'));
+
+// Use express-session middleware to handle user sessions
+app.use(session({
+    secret: 'secretKey', // Replace with a more secure secret in production
+    resave: false,
+    saveUninitialized: true,
+}));
 
 // Redirect root URL ('/') to the login page
 app.get('/', (req, res) => {
@@ -29,6 +37,9 @@ app.get('/Register', (req, res) => {
 });
 
 app.get('/Home', (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/Login?alert=not-logged-in');
+    }
     res.sendFile(path.join(__dirname, 'public/Home.html'));
 });
 
@@ -51,12 +62,11 @@ app.listen(PORT, () => {
 });
 
 // Connect to MongoDB
-mongoose.connect('mongodb+srv://mminggming:mingming13@mmingg.dlq3d.mongodb.net/', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => {
+mongoose.connect('mongodb+srv://mminggming:mingming13@mmingg.dlq3d.mongodb.net/')
+.then(() => {
     console.log("Connected to MongoDB");
-}).catch(err => {
+})
+.catch(err => {
     console.error("MongoDB connection error:", err);
 });
 
@@ -140,3 +150,43 @@ app.post('/Register',
         }
     }
 );
+
+// Handle login route
+app.post('/Login', async (req, res) => {
+    const { username, password } = req.body;
+
+    try {
+        // Check if user exists with the provided username
+        const user = await User.findOne({ Username: username });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid username or password' });
+        }
+
+        // Compare entered password with stored hashed password
+        const isMatch = await bcrypt.compare(password, user.Password);
+
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Invalid username or password' });
+        }
+
+        // Store user session
+        req.session.user = user;
+
+        // Redirect to home page or any protected route
+        res.redirect('/Home');
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred during login.' });
+    }
+});
+
+// Logout route to destroy the session
+app.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).json({ message: 'Error in logging out.' });
+        }
+        res.redirect('/Login');
+    });
+});

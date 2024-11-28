@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,9 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="public/css/main.css" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-
     
-
     <style>
         body {
             margin: 0;
@@ -83,6 +82,7 @@
         }
     </style>
 </head>
+
 <body>
     <header>
         <div class="container-fluid position-relative p-0">
@@ -112,7 +112,7 @@
                                 <a href="Login.html" class="nav-link active">Login</a>
                             </li>
                             <li class="nav-item">
-                                <a href="Register.html" class="nav-link ">Register</a>
+                                <a href="Register.html" class="nav-link">Register</a>
                             </li>
                         </ul>
                     </div>
@@ -120,37 +120,46 @@
             </nav>
         </div>
     </header>
-    
-    
-        <div class="main-container">
-            <div class="login-card">
-                <h2>Login</h2>
-                <form action="/Login" method="POST">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" name="username" id="username" required class="form-control">
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" name="password" id="password" required class="form-control">
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Login</button>
-                </form>          
-                <a href="/forgot-password" class="forgot-password">Forgot Password?</a>
-                <p class="footer-text">Not registered? <a href="register.html" class="text-warning">Create an account</a></p>
-            </div>
-        </div>
-    
-        <script>
-            // Check for 'alert' query parameter in the URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const alertParam = urlParams.get('alert');
-    
-            if (alertParam) {
-                alert('Please log in to access this page.');
-            }
-        </script>
-        <script>src="/Login.js"</script>
 
+    <div class="main-container">
+        <div class="login-card">
+            <h2>Login</h2>
+            <form id="loginForm" action="/Login" method="POST">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" name="username" id="username" required class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" name="password" id="password" required class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+            </form>          
+            <a href="/forgot-password" class="forgot-password">Forgot Password?</a>
+            <p class="footer-text">Not registered? <a href="Register.html" class="text-warning">Create an account</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Check for 'alert' query parameter in the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const alertParam = urlParams.get('alert');
+    
+        if (alertParam) {
+            alert('Please log in to access this page.');
+        }
+
+        // Form validation: Display alert if validation fails
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            let username = document.getElementById('username').value;
+            let password = document.getElementById('password').value;
+
+            if (!username || !password) {
+                event.preventDefault();
+                alert("Please fill in both fields.");
+            }
+        });
+    </script>
 </body>
+
 </html>
