@@ -76,6 +76,7 @@ const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 // Handle registration route with validation
 app.post('/Register',
+    // Validation middleware
     [
         check('Name').notEmpty().withMessage('Name is required'),
         check('Surname').notEmpty().withMessage('Surname is required'),

@@ -125,7 +125,7 @@
         <div class="main-container">
             <div class="login-card">
                 <h2>Login</h2>
-                <form action="/login" method="POST">
+                <form action="/Login" method="POST">
                     <div class="mb-3">
                         <label for="username" class="form-label">Username</label>
                         <input type="text" name="username" id="username" required class="form-control">
@@ -135,7 +135,7 @@
                         <input type="password" name="password" id="password" required class="form-control">
                     </div>
                     <button type="submit" class="btn btn-primary w-100">Login</button>
-                </form>
+                </form>          
                 <a href="/forgot-password" class="forgot-password">Forgot Password?</a>
                 <p class="footer-text">Not registered? <a href="register.html" class="text-warning">Create an account</a></p>
             </div>
@@ -150,6 +150,7 @@
                 alert('Please log in to access this page.');
             }
         </script>
+        <script>src="/Login.js"</script>
 
 </body>
 </html>
