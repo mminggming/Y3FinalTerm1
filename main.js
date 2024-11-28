@@ -180,3 +180,23 @@ app.get('/logout', (req, res) => {
         res.redirect('/Login');
     });
 });
+
+const nowShowingSchema = new mongoose.Schema({
+    Title: String,
+    Synopsis: String,
+    img: String, 
+    Date: String,
+}, { collection: 'NowShowing' });
+
+const NowShowing = mongoose.models.NowShowing || mongoose.model('NowShowing', nowShowingSchema);
+
+// Route to fetch movies from the 'NowShowing' collection
+app.get('/api/nowshowing', async (req, res) => {
+    try {
+        const movies = await NowShowing.find(); // Fetch all movies
+        res.json(movies); // Send the data as JSON
+    } catch (error) {
+        console.error("Error fetching NowShowing data:", error);
+        res.status(500).json({ message: 'Error fetching NowShowing data' });
+    }
+});
