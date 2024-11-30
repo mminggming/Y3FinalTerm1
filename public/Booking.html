@@ -10,7 +10,6 @@
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700,900" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="public/css/main.css" />
-    <script src="book.js"></script>
 
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -251,6 +250,8 @@
         <div id="seatDetails">
             <p><strong>Seats:</strong></p>
             <ul id="selectedSeatsList"></ul>
+            <label for="promoCode" class="font-weight-bold text-black">Enter Promo Code</label>
+            <input type="text" id="promoCode" class="form-control" placeholder="Enter promo code (optional)">
             <p><strong>Total Price:</strong> <span id="receiptTotalPrice">0</span> THB</p>
         </div>
         <button id="purchaseTicket" class="btn btn-success mt-3" data-bs-toggle="modal" data-bs-target="#ticketModal">Purchase Ticket</button>
@@ -275,13 +276,12 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-success">Confirm</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const seatsContainer = document.getElementById("seatsContainer");
@@ -289,16 +289,20 @@
             const totalPriceDisplay = document.getElementById("totalPrice");
             const selectedSeatsList = document.getElementById("selectedSeatsList");
             const receiptTotalPrice = document.getElementById("receiptTotalPrice");
-
+    
             const frontSeatPrice = 240;
             const backSeatPrice = 260;
-
+    
+            // Theater list to randomly choose from (1 to 5)
+            const theaterList = [1, 2, 3, 4, 5];
+    
+            // Create seats dynamically
             for (let i = 0; i < 100; i++) {
                 const seat = document.createElement("div");
                 seat.classList.add("seat");
-
+    
                 const column = i % 10;
-
+    
                 if (column === 4 || column === 5) {
                     seat.classList.add("aisle");
                     seat.style.backgroundColor = "lightgray";
@@ -314,80 +318,69 @@
                     seat.dataset.row = Math.floor(i / 10) + 1;
                     seat.dataset.seat = (i % 10) + 1;
                 }
-
+    
                 if (i % 5 === 0 && !seat.classList.contains("aisle")) {
                     seat.classList.add("reserved");
                 } else if (!seat.classList.contains("aisle")) {
                     seat.classList.add("available");
                     seat.addEventListener("click", () => toggleSeatSelection(seat));
                 }
-
+    
                 seatsContainer.appendChild(seat);
             }
-
+    
             function toggleSeatSelection(seat) {
-                if (seat.classList.contains("available")) {
-                    seat.classList.remove("available");
-                    seat.classList.add("selected");
-                    seat.style.backgroundColor = "red";
-                } else if (seat.classList.contains("selected")) {
-                    seat.classList.remove("selected");
-                    seat.classList.add("available");
-                    seat.style.backgroundColor = "";
-                }
+                seat.classList.toggle("selected");
+                seat.style.backgroundColor = seat.classList.contains("selected") ? "red" : "";
                 updateBookingSummary();
             }
-
+    
             function updateBookingSummary() {
                 const selectedSeats = document.querySelectorAll(".seat.selected");
                 selectedSeatsList.innerHTML = '';
                 let totalPrice = 0;
-
+    
                 selectedSeats.forEach(seat => {
                     const row = seat.dataset.row;
                     const seatNumber = seat.dataset.seat;
                     totalPrice += parseInt(seat.dataset.price);
-
+    
                     const seatItem = document.createElement("li");
                     seatItem.textContent = `Row: ${row}, Seat: ${seatNumber}`;
                     selectedSeatsList.appendChild(seatItem);
                 });
-
+    
                 totalPriceDisplay.textContent = totalPrice;
                 receiptTotalPrice.textContent = totalPrice;
             }
-
-            // Handling Search button click
+    
             const searchButton = document.getElementById("searchButton");
             const cinemaSelect = document.getElementById("cinema");
             const theatreSelect = document.getElementById("theatre");
             const timeButtonsContainer = document.getElementById("timeButtonsContainer");
-            const movieInfo = document.querySelector(".movie-info");
-            const receiptMovieTime = document.getElementById("showTime");
-            const receiptTheater = document.getElementById("randomTheater");
-
+    
             searchButton.addEventListener("click", () => {
                 const selectedCinema = cinemaSelect.value;
                 const selectedTheatre = theatreSelect.value;
-
+    
                 if (selectedCinema && selectedTheatre) {
-                    // Update Movie info
-                    movieInfo.innerHTML = `
-                        <p><strong>Movie:</strong> ${selectedCinema}</p>
-                        <p><strong>Time:</strong> <span id="showTime">-</span></p>
-                        <p><strong>Location:</strong> ${selectedTheatre}</p>
-                    `;
-                    receiptMovieTime.textContent = '-'; // Default time
+                    document.getElementById("receiptMovie").textContent = selectedCinema;
+                    document.getElementById("location").textContent = selectedTheatre;
+    
+                    // Randomly select a theater number (from 1 to 5)
+                    const randomTheater = theaterList[Math.floor(Math.random() * theaterList.length)];
+                    document.getElementById("randomTheater").textContent = randomTheater;
+    
                     generateShowtimeButtons();
                 } else {
                     alert("Please select both cinema and theatre.");
                 }
             });
-
+    
             function generateShowtimeButtons() {
                 const showTimes = ["10:00", "13:00", "16:00", "19:00"];
-                timeButtonsContainer.innerHTML = ''; // Clear previous buttons
-
+                timeButtonsContainer.innerHTML = '';
+    
                 showTimes.forEach(time => {
                     const button = document.createElement("button");
                     button.classList.add("time-button");
@@ -395,36 +388,70 @@
                     button.addEventListener("click", () => {
                         document.querySelectorAll(".time-button").forEach(btn => btn.classList.remove("selected"));
                         button.classList.add("selected");
-
-                        // Update time in both movie info and receipt
-                        receiptMovieTime.textContent = time;
+                        document.getElementById("showTime").textContent = time;
                     });
                     timeButtonsContainer.appendChild(button);
                 });
             }
-
-            // Handle the purchase button click
-            document.getElementById("purchaseTicket").addEventListener("click", () => {
+    
+            // Validate booking on "Confirm Booking" button click
+            confirmButton.addEventListener("click", () => {
+                const selectedSeats = document.querySelectorAll(".seat.selected");
+                const selectedCinema = cinemaSelect.value;
+                const selectedTheatre = theatreSelect.value;
+                const selectedTime = document.getElementById("showTime").textContent;
+    
+                if (!selectedSeats.length) {
+                    alert("Please select at least one seat.");
+                } else if (!selectedCinema || !selectedTheatre || !selectedTime) {
+                    alert("Please select a cinema, theatre, and showtime.");
+                } else {
+                    // Display the confirmation message
+                    alert("Booking confirmed! Next, you have to purchase ticket.");
+                    // Optionally, you can proceed to the next steps, like showing the payment modal
+                }
+            });
+    
+            const purchaseButton = document.getElementById("purchaseTicket");
+            purchaseButton.addEventListener("click", () => {
                 const modalMovie = document.getElementById("modalMovie");
                 const modalTime = document.getElementById("modalTime");
                 const modalLocation = document.getElementById("modalLocation");
                 const modalTheater = document.getElementById("modalTheater");
                 const modalSeatList = document.getElementById("modalSeatList");
                 const modalTotalPrice = document.getElementById("modalTotalPrice");
-
-                const selectedSeats = Array.from(document.querySelectorAll(".seat.selected"));
-                const selectedSeatsList = selectedSeats.map(seat => `Row: ${seat.dataset.row}, Seat: ${seat.dataset.seat}`).join('<br>');
-
+    
                 modalMovie.textContent = cinemaSelect.value;
-                modalTime.textContent = receiptMovieTime.textContent;
+                modalTime.textContent = document.getElementById("showTime").textContent;
                 modalLocation.textContent = theatreSelect.value;
-                modalTheater.textContent = theatreSelect.value;
-                modalSeatList.innerHTML = selectedSeatsList;
+    
+                // Get the random theater number and display it in the modal
+                modalTheater.textContent = document.getElementById("randomTheater").textContent;
+    
+                modalSeatList.innerHTML = selectedSeatsList.innerHTML;
                 modalTotalPrice.textContent = receiptTotalPrice.textContent;
             });
+    
+            document.querySelector(".modal-footer .btn-success").addEventListener("click", () => {
+                alert("Thank you! Your booking is complete.");
+                const modal = bootstrap.Modal.getInstance(document.getElementById("ticketModal"));
+                modal.hide();
+                resetBooking();
+            });
+    
+            function resetBooking() {
+                document.querySelectorAll(".seat.selected").forEach(seat => {
+                    seat.classList.remove("selected");
+                    seat.style.backgroundColor = "";
+                });
+                document.getElementById("showTime").textContent = "-";
+                selectedSeatsList.innerHTML = '';
+                totalPriceDisplay.textContent = "0";
+                receiptTotalPrice.textContent = "0";
+                document.getElementById("randomTheater").textContent = "-"; // Reset random theater
+            }
         });
     </script>
-    
     
     <br>  
     <footer
