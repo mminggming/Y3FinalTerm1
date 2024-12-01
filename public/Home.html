@@ -66,6 +66,32 @@
           background-color: #0056b3;
       }
 
+        .movie-banner {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .movie-banner img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+
+        .overlay-form {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            color: white;
+        }
+
+        .overlay-form label {
+            color: white;
+        }
   </style>
 </head>
 <body>
@@ -103,50 +129,40 @@
                 </div>
             </div>
         </nav>
-    </div>
-</header>
 
-    
-    <br><br><br>
-    <section class="section bg-light pb-0">
-      <div class="container">
-          <div class="d-flex justify-content-center align-items-center">
-              <div class="col-md-8 block-32 mt-5" data-aos="fade-up" data-aos-offset="-200">
-                  <form action="#" class="row g-3 ">
-                      <div class="col-md-4">
-                          <label for="cinema" class="font-weight-bold text-black">Select Cinema</label>
-                          <div class="field-icon-wrap">
-                              <div class="icon"><span class="ion-ios-arrow-down"></span></div>
-                              <select id="cinema" class="form-control">
-                                  <option value="">-- Select Cinema --</option>
-                                  <option value="cinema1">Redone</option>
-                                  <option value="cinema2">Gladiator II</option>
-                                  <option value="cinema3">Moana2</option>
-                                  <option value="cinema4">Myhero</option>
-                              </select>
-                          </div>
-                      </div>
-                      <div class="col-md-4">
-                          <label for="theatre" class="font-weight-bold text-black">Select Theatre</label>
-                          <div class="field-icon-wrap">
-                              <div class="icon"><span class="ion-ios-arrow-down"></span></div>
-                              <select id="theatre" class="form-control">
-                                  <option value="">-- Select Theatre --</option>
-                                  <option value="theatre1">Siam paragon</option>
-                                  <option value="theatre2">Icon siam</option>
-                                  <option value="theatre3">Emquatier</option>
-                                  <option value="theatre4">Sukhumvit</option>
-                              </select>
-                          </div>
-                      </div>
-                      <div class="col-md-4 d-flex align-items-end">
-                          <a class="btn btn-primary btn-md w-100 text-white" href="Booking.html">Search</a>
-                      </div>
-                  </form>
-              </div>
+        <br><br>
+        <div class="movie-banner">
+          <img src="images/wickedbanner.jpeg" alt="Movie Banner">
+          <div class="overlay-form">
+              <form action="Booking.html" method="GET" class="row g-3">
+                  <div class="col-md-4">
+                      <label for="cinema">Select Cinema</label>
+                      <select id="cinema" name="cinema" class="form-control">
+                          <option value="">-- Select Cinema --</option>
+                          <option value="Redone">Redone</option>
+                          <option value="Gladiator II">Gladiator II</option>
+                          <option value="Moana2">Moana 2</option>
+                          <option value="Myhero">Myhero</option>
+                      </select>
+                  </div>
+                  <div class="col-md-4">
+                      <label for="theatre">Select Theatre</label>
+                      <select id="theatre" name="theatre" class="form-control">
+                          <option value="">-- Select Theatre --</option>
+                          <option value="Siam paragon">Siam Paragon</option>
+                          <option value="Icon siam">Icon Siam</option>
+                          <option value="Emquatier">Emquatier</option>
+                          <option value="Sukhumvit">Sukhumvit</option>
+                      </select>
+                  </div>
+                  <div class="col-md-4 d-flex align-items-end">
+                      <button type="submit" class="btn btn-primary w-100">Search</button>
+                  </div>
+              </form>
           </div>
       </div>
-  </section>
+</header>
+
   
     <br><br>
     <div class="container">
@@ -352,7 +368,7 @@
               
                   </div> <!-- End of ranking-container -->
               </div>
-              
+
       <br>  
       <footer
               class="text-center text-lg-start text-white"
