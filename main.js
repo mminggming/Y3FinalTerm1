@@ -200,3 +200,8 @@ app.get('/api/nowshowing', async (req, res) => {
         res.status(500).json({ message: 'Error fetching NowShowing data' });
     }
 });
+
+
+app.get('/edit_profile', (req, res) => {
+    res.sendFile(path.join(__dirname, 'EditProfile.ejs'));
+});
