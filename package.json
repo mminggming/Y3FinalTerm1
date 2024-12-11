@@ -27,6 +27,7 @@
     "mongoose": "^8.8.3",
     "next-auth": "^4.24.11",
     "nodemailer": "^6.9.16",
+    "nodemailer-smtp-transport": "^2.7.4",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0"
   }
