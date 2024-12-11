@@ -79,11 +79,11 @@ passport.use(new GoogleStrategy({
 
 // Serialize and deserialize user
 passport.serializeUser(function(user, done) {
-  done(null, user._id);
+  done(null, user._id);  // Store the user ID in the session
 });
 
 passport.deserializeUser(async function(id, done) {
-  const user = await User.findById(id);
+  const user = await User.findById(id);  // Retrieve user from DB using ID
   done(null, user);
 });
 
@@ -95,6 +95,7 @@ app.get('/auth/google',
 app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   function(req, res) {
+    req.session.user = req.user;  // Store user data in session after login
     res.redirect('/Home');
   }
 );
@@ -107,7 +108,7 @@ app.post('/Login', async (req, res) => {
         // Check if login is via Google OAuth
         const googleUser = await User.findOne({ googleId: username });
         if (googleUser) {
-            req.session.user = googleUser;
+            req.session.user = googleUser;  // Store user data in session
             return res.redirect('/Home');
         }
 
@@ -124,7 +125,7 @@ app.post('/Login', async (req, res) => {
             return res.status(400).json({ message: 'Invalid username or password' });
         }
 
-        req.session.user = user;
+        req.session.user = user;  // Store user data in session
         res.redirect('/Home');
     } catch (error) {
         console.error(error);
@@ -146,7 +147,7 @@ app.get('/Register', (req, res) => {
 });
 
 app.get('/Home', (req, res) => {
-    console.log("User Session:", req.user); 
+    console.log("User Session:", req.session.user);  // Check user session
     if (!req.session.user) {
         return res.redirect('/Login?alert=not-logged-in');
     }
