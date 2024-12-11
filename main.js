@@ -19,6 +19,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
+app.set("views", path.join(__dirname, "views"));
+app.set('view engine', 'ejs')
+
 // Session middleware setup
 app.use(session({
     secret: 'secretKey',
@@ -135,10 +138,10 @@ app.post('/Login', async (req, res) => {
 
 // Routes
 app.get('/', (req, res) => {
-    res.redirect('/Login');
+    res.redirect('/login');
 });
 
-app.get('/Login', (req, res) => {
+app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/Login.html'));
 });
 
@@ -149,7 +152,7 @@ app.get('/Register', (req, res) => {
 app.get('/Home', (req, res) => {
     console.log("User Session:", req.session.user);  // Check user session
     if (!req.session.user) {
-        return res.redirect('/Login?alert=not-logged-in');
+        return res.redirect('/login?alert=not-logged-in');
     }
     res.sendFile(path.join(__dirname, 'public/Home.html'));
 });
@@ -216,7 +219,7 @@ app.get('/logout', (req, res) => {
         if (err) {
             return res.status(500).json({ message: 'Error in logging out.' });
         }
-        res.redirect('/Login');
+        res.redirect('/login');
     });
 });
 
@@ -246,10 +249,96 @@ app.get('/api/nowshowing', async (req, res) => {
 // Edit Profile Route (Ensure you're sending EJS properly)
 app.get('/edit_profile', (req, res) => {
     if (!req.session.user) {
-        return res.redirect('/Login?alert=not-logged-in');
+        return res.redirect('/login?alert=not-logged-in');
     }
-    res.sendFile(path.join(__dirname, 'public/EditProfile.html'));
+
+    User.findOne({ Email: req.session.user.Email })
+      .then(user => {
+
+
+        let formattedBirthdate = '';
+          if (user.Birthdate) {
+            const birthdate = new Date(user.Birthdate);
+            const year = birthdate.getFullYear();
+            const month = String(birthdate.getMonth() + 1).padStart(2, '0');
+            const day = String(birthdate.getDate()).padStart(2, '0');
+            formattedBirthdate = `${year}-${month}-${day}`;
+          }
+
+         
+
+        if (user) {
+          console.log(user);
+          // แก้ไขบรรทัดนี้
+          res.render('edit_profile', { post: { ...user.toObject(), Birthdate: formattedBirthdate } });
+        } else {
+          console.log('User not found');
+          res.status(404).send('User not found');
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        res.status(500).send('Internal Server Error');
+      });
 });
+
+
+app.post('/edit_profile', (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/login?alert=not-logged-in');
+    }
+
+
+    // แปลง Birthdate เป็นวันที่ (ถ้ามี)
+    let formattedBirthdate = null;
+    const {Birthdate, Password} = req.body
+    if (Birthdate) {
+        formattedBirthdate = new Date(Birthdate);
+    }
+
+    bcrypt.genSalt(10, (err, salt) => {
+        bcrypt.hash(Password, salt, (err, hash) => {
+            let updatedData = Object.fromEntries(
+                Object.entries({
+                    ...req.body,
+                    Birthdate: formattedBirthdate,
+                }).filter(([key]) => key !== 'Password')
+            );
+            
+
+            if(Password){
+                 updatedData = {
+                    ...req.body,
+                    Birthdate: formattedBirthdate,
+                    Password: hash 
+                };
+            } 
+       
+        // ใช้ findOneAndUpdate เพื่ออัปเดตข้อมูล
+        User.findOneAndUpdate(
+            { Email: req.session.user.Email }, // เงื่อนไขการค้นหา
+            updatedData, // ข้อมูลที่จะอัปเดต
+            { new: true, runValidators: true } // ตัวเลือก: คืนค่าข้อมูลใหม่ และใช้การตรวจสอบตาม Schema
+        )
+        .then(updatedUser => {
+            if (updatedUser) {
+            
+                res.redirect('/home');
+            } else {
+                res.status(404).send('User not found');
+            }
+        })
+        .catch(err => {
+            console.error('Error updating user:', err);
+            res.status(500).send('Internal Server Error');
+        });
+            })
+        })
+   
+
+
+});
+
 
 // Start the server
 app.listen(PORT, () => {
