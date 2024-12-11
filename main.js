@@ -8,7 +8,7 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const dotenv = require('dotenv');
 const { check, validationResult } = require('express-validator');
-
+const router = express.Router();
 const app = express();
 const PORT = 3000;
 
@@ -18,6 +18,10 @@ dotenv.config();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static('public'));
+
+app.set('views', path.join(__dirname, 'views'));  // กำหนดโฟลเดอร์ที่เก็บไฟล์ EJS
+app.set('view engine', 'ejs');  // ใช้ EJS เป็น view engine
+
 
 // Session middleware setup
 app.use(session({
@@ -220,14 +224,27 @@ app.get('/logout', (req, res) => {
     });
 });
 
-// Now Showing Schema
+// // Now Showing Schema
+// const nowShowingSchema = new mongoose.Schema({
+//     Title: String,
+//     Synopsis: String,
+//     img: String,
+//     Date: String,
+//     Type: String,
+//     Time: String
+// }, { collection: 'NowShowing' });
+
+// const NowShowing = mongoose.model('NowShowing', nowShowingSchema);
+
 const nowShowingSchema = new mongoose.Schema({
     Title: String,
     Synopsis: String,
     img: String,
     Date: String,
     Type: String,
-    Time: String
+    Time: String,
+    Rate: Number,  // Rating of the movie
+    Video: String  // Trailer video URL
 }, { collection: 'NowShowing' });
 
 const NowShowing = mongoose.model('NowShowing', nowShowingSchema);
@@ -242,6 +259,21 @@ app.get('/api/nowshowing', async (req, res) => {
         res.status(500).json({ message: 'Error fetching NowShowing data' });
     }
 });
+
+app.get('/movie-details/:title', async (req, res) => {
+    try {
+        const movie = await NowShowing.findOne({ Title: req.params.title });
+        if (!movie) {
+            return res.status(404).send('Movie not found');
+        }
+        res.render('movie-details', { movie });
+    } catch (error) {
+        console.error("Error fetching movie details:", error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
 
 // Edit Profile Route (Ensure you're sending EJS properly)
 app.get('/edit_profile', (req, res) => {
