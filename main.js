@@ -8,6 +8,8 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const dotenv = require('dotenv');
 const { check, validationResult } = require('express-validator');
+const nodemailer = require('nodemailer');
+
 
 const app = express();
 const PORT = 3000;
@@ -337,6 +339,106 @@ app.post('/edit_profile', (req, res) => {
    
 
 
+});
+
+
+// Send Email
+/* ---------- config สำหรับ gmail ---------- */
+function sendmail(toemail, subject, html) {
+    const transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        service: 'gmail',  
+        auth: {
+            user: 'nitiporn.sir@gmail.com',   // your email
+            //pass: 'Sittichai7749!'  // your email password
+             pass: 'gfbb tphr nwyh riiw'    // for app password
+        }
+    });
+    
+    // send mail with defined transport object
+    let mailOptions = {
+        from: '"COSCI - Test mail" <coscidigital@gmail.com>',  // sender address
+        to: toemail,    // list of receivers
+        subject: subject,   // Subject line
+        // text: textMail
+        html: html     // html mail body
+    };
+  
+    // send mail with defined transport object
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.log(error);
+            res.send('เกิดข้อผิดพลาด ไม่สามารถส่งอีเมลได้ โปรดลองใหม่ภายหลัง');
+        }
+        else {
+            // console.log('INFO EMAIL:', info);
+            console.log("send email successful");
+        }
+    });
+  }
+
+app.get("/forgot-password", function(request, response) {
+    response.render("forgotpass.ejs", { message: ''});
+});
+  
+app.post("/forgot-password", function(req, res) {
+var user_buasri     = req.body.username;
+console.log(user_buasri);
+
+if (user_buasri) {
+    User.findOne({ Username: user_buasri })
+    .then(user => {
+
+      if (user) {
+        console.log(user);
+        let randomPass = Math.random().toString(36).substring(2, 10);
+
+        var emails = user.Email;
+        var subject = "รหัสผ่านของคุณมีการเปลี่ยนแปลง";
+        var html = "สวัสดี คุณ " + user.Username + "<br><br>" +
+            "&nbsp;&nbsp;รหัสผ่านเว็บไซต์ NodeLoginX ของคุณมีการเปลี่ยนแปลงตามที่คุณร้องขอ<br>" + 
+            "รหัสผ่านใหม่ของคุณ คือ &nbsp;" + randomPass + "<br>" +
+            "ให้ใช้รหัสผ่านนี้ในการเข้าสู่ระบบ และคุณสามารถเปลี่ยนแปลงรหัสผ่านของคุณได้หลังจากเข้าสู่ระบบแล้ว" + "<br><br><br>ขอบคุณ<br>NodeLoginX";
+        console.log('sendmail')
+        sendmail(emails, subject, html);
+        console.log(emails);
+
+        // Update Password
+        bcrypt.genSalt(10, function(err, salt) {
+            bcrypt.hash(randomPass, salt, function(err, hash) {
+
+                User.findOneAndUpdate(
+                    { Email: user.Email }, // เงื่อนไขการค้นหา
+                    {Password: hash}, // ข้อมูลที่จะอัปเดต
+                    { new: true, runValidators: true } // ตัวเลือก: คืนค่าข้อมูลใหม่ และใช้การตรวจสอบตาม Schema
+                )
+                .then(updatedUser => {
+                    if (updatedUser) {
+                    
+                        res.redirect("/login");
+                    } else {
+                        res.status(404).send('User not found');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error updating user:', err);
+                    res.status(500).send('Internal Server Error');
+                });
+           
+            });
+        });
+      
+
+      } else {
+        console.log('User not found');
+        res.status(404).send('User not found');
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      res.status(500).send('Internal Server Error');
+    });
+}
 });
 
 
