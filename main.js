@@ -55,21 +55,21 @@ passport.use(new GoogleStrategy({
     callbackURL: 'http://localhost:3000/auth/google/callback',
 }, async (accessToken, refreshToken, profile, done) => {
     try {
-        let user = await prisma.user.findUnique({
-            where: { Email: profile.emails[0].value },
+        let user = await prisma.register.findUnique({
+            where: { Email: profile.emails[0].value }, // Ensure 'register' matches your model
         });
 
         if (!user) {
-            user = await prisma.user.create({
+            user = await prisma.register.create({
                 data: {
-                    Name: profile.displayName,          // Set Name from the profile
-                    Surname: "",                        // Optional: Set a default Surname
-                    Email: profile.emails[0].value,     // Email from the profile
-                    Username: profile.id,               // Use Google ID as Username
-                    Password: null,                     // Set Password to null for OAuth users
-                    Sex: "Unknown",                          // Optional: Default Sex to null
-                    Birthdate: null,                    // Optional: Default Birthdate to null
-                    Phone: "Unknown"                         // Optional: Default Phone to null
+                    Name: profile.displayName,
+                    Surname: "",
+                    Email: profile.emails[0].value,
+                    Username: profile.id,
+                    Password: null,
+                    Sex: "Unknown",
+                    Birthdate: null,
+                    Phone: "Unknown"
                 },
             });
         }
@@ -82,13 +82,14 @@ passport.use(new GoogleStrategy({
 
 
 
+
 passport.serializeUser((user, done) => {
     done(null, user.id);
 });
 
 passport.deserializeUser(async (id, done) => {
     try {
-        const user = await prisma.user.findUnique({ where: { id } });
+        const user = await prisma.register.findUnique({ where: { id } });
         done(null, user);
     } catch (error) {
         done(error);
@@ -142,7 +143,7 @@ app.post('/Register', [
     }
 
     try {
-        const existingUser = await prisma.user.findFirst({
+        const existingUser = await prisma.register.findFirst({
             where: {
                 OR: [
                     { email: req.body.Email },
@@ -157,7 +158,7 @@ app.post('/Register', [
 
         const hashedPassword = await bcrypt.hash(req.body.Password, 10);
 
-        await prisma.user.create({
+        await prisma.register.create({
             data: {
                 name: req.body.Name,
                 surname: req.body.Surname,
@@ -207,8 +208,30 @@ app.post('/Login', async (req, res) => {
     }
 });
 
+app.get('/edit_profile', async (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/login?alert=not-logged-in');
+    }
 
-// Edit profile route
+    try {
+        const user = await prisma.register.findUnique({
+            where: { Email: req.session.user.Email }, // Match by email
+        });
+
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+
+        res.render('edit_profile', { post: user });
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
+
+// Edit profile route with Prisma
 app.post('/edit_profile', async (req, res) => {
     if (!req.session.user) {
         return res.redirect('/login?alert=not-logged-in');
@@ -216,87 +239,37 @@ app.post('/edit_profile', async (req, res) => {
 
     try {
         const { Birthdate, Password, ...otherFields } = req.body;
-        const hashedPassword = Password ? await bcrypt.hash(Password, 10) : undefined;
+        const hashedPassword = Password ? await bcrypt.hash(Password, 10) : null;
 
         const updatedData = {
             ...otherFields,
-            birthdate: Birthdate ? new Date(Birthdate) : null,
-            ...(Password && { password: hashedPassword }),
+            Birthdate: Birthdate ? new Date(Birthdate) : null,
+            ...(hashedPassword && { Password: hashedPassword }),
         };
 
-        const updatedUser = await prisma.user.update({
-            where: { email: req.session.user.email },
+        const updatedUser = await prisma.register.update({
+            where: { Email: req.session.user.Email },
             data: updatedData,
         });
 
-        if (!updatedUser) {
-            return res.status(404).send('User not found');
-        }
-
         res.redirect('/Home');
     } catch (error) {
-        console.error('Error updating user:', error);
+        console.error('Error updating profile:', error);
         res.status(500).send('Internal Server Error');
-      });
-});
-
-
-app.post('/edit_profile', (req, res) => {
-    if (!req.session.user) {
-        return res.redirect('/login?alert=not-logged-in');
     }
+  });
 
 
-    // แปลง Birthdate เป็นวันที่ (ถ้ามี)
-    let formattedBirthdate = null;
-    const {Birthdate, Password} = req.body
-    if (Birthdate) {
-        formattedBirthdate = new Date(Birthdate);
+// Fetch NowShowing data
+app.get('/api/nowshowing', async (req, res) => {
+    try {
+        const movies = await prisma.nowShowing.findMany();
+        res.json(movies);
+    } catch (error) {
+        console.error('Error fetching NowShowing data:', error);
+        res.status(500).json({ message: 'Error fetching NowShowing data' });
     }
-
-    bcrypt.genSalt(10, (err, salt) => {
-        bcrypt.hash(Password, salt, (err, hash) => {
-            let updatedData = Object.fromEntries(
-                Object.entries({
-                    ...req.body,
-                    Birthdate: formattedBirthdate,
-                }).filter(([key]) => key !== 'Password')
-            );
-            
-
-            if(Password){
-                 updatedData = {
-                    ...req.body,
-                    Birthdate: formattedBirthdate,
-                    Password: hash 
-                };
-            } 
-       
-        // ใช้ findOneAndUpdate เพื่ออัปเดตข้อมูล
-        User.findOneAndUpdate(
-            { Email: req.session.user.Email }, // เงื่อนไขการค้นหา
-            updatedData, // ข้อมูลที่จะอัปเดต
-            { new: true, runValidators: true } // ตัวเลือก: คืนค่าข้อมูลใหม่ และใช้การตรวจสอบตาม Schema
-        )
-        .then(updatedUser => {
-            if (updatedUser) {
-            
-                res.redirect('/home');
-            } else {
-                res.status(404).send('User not found');
-            }
-        })
-        .catch(err => {
-            console.error('Error updating user:', err);
-            res.status(500).send('Internal Server Error');
-        });
-            })
-        })
-   
-
-
 });
-
 
 // Start the server
 app.listen(PORT, () => {
