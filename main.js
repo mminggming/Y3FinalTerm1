@@ -1,13 +1,13 @@
 const express = require('express');
-const path = require('path'); // To work with file paths
-const bodyParser = require('body-parser'); // To parse request bodies
-const mongoose = require('mongoose'); // MongoDB integration
+const path = require('path');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const session = require('express-session'); // Session handling
+const session = require('express-session');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const dotenv = require('dotenv');
-const { check, validationResult } = require('express-validator'); // Validation
+const { check, validationResult } = require('express-validator');
 
 const app = express();
 const PORT = 3000;
@@ -19,7 +19,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
-// Session middleware setup (only once)
+// Session middleware setup
 app.use(session({
     secret: 'secretKey',
     resave: false,
@@ -30,11 +30,35 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// MongoDB Connection
+mongoose.connect('mongodb+srv://mminggming:mingming13@mmingg.dlq3d.mongodb.net/USERDATA')
+.then(() => {
+    console.log("Connected to MongoDB/USERDATA");
+})
+.catch(err => {
+    console.error("MongoDB connection error:", err);
+});
+
+// User Schema (Google and local login support)
+const userSchema = new mongoose.Schema({
+    Name: String,
+    Surname: String,
+    Sex: String,
+    Birthdate: Date,
+    Email: { type: String, unique: true },
+    Phone: String,
+    Username: { type: String, unique: true },
+    Password: String,  // Only used for local authentication
+    googleId: String,  // Google ID for OAuth users
+}, { collection: 'Register' });
+
+const User = mongoose.model('User', userSchema);
+
 // Google OAuth strategy setup
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: 'http://localhost:3000/auth/google/callback',
+    callbackURL: 'http://localhost:3000/auth/google/callback', // Adjust for production
   },
   async function(accessToken, refreshToken, profile, done) {
     let user = await User.findOne({ Email: profile.emails[0].value });
@@ -43,7 +67,7 @@ passport.use(new GoogleStrategy({
         user = new User({
             Name: profile.displayName,
             Email: profile.emails[0].value,
-            Username: profile.id, // Use Google ID as the username
+            Username: profile.id,  // Use Google ID as the username
         });
 
         await user.save();
@@ -75,9 +99,42 @@ app.get('/auth/google/callback',
   }
 );
 
+// Login Route (Support for both Google and local login)
+app.post('/Login', async (req, res) => {
+    const { username, password } = req.body;
+
+    try {
+        // Check if login is via Google OAuth
+        const googleUser = await User.findOne({ googleId: username });
+        if (googleUser) {
+            req.session.user = googleUser;
+            return res.redirect('/Home');
+        }
+
+        // Check for local login with username/password
+        const user = await User.findOne({ Username: username });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid username or password' });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.Password);
+
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Invalid username or password' });
+        }
+
+        req.session.user = user;
+        res.redirect('/Home');
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred during login.' });
+    }
+});
+
 // Routes
 app.get('/', (req, res) => {
-    res.redirect('/Login'); 
+    res.redirect('/Login');
 });
 
 app.get('/Login', (req, res) => {
@@ -89,47 +146,12 @@ app.get('/Register', (req, res) => {
 });
 
 app.get('/Home', (req, res) => {
-    console.log("User Session:", req.user); // Use req.user to check user from Passport
-    if (!req.user) { // Check if user is authenticated using Passport
+    console.log("User Session:", req.user); 
+    if (!req.session.user) {
         return res.redirect('/Login?alert=not-logged-in');
     }
     res.sendFile(path.join(__dirname, 'public/Home.html'));
 });
-
-const app1 = require('./ForgotPass');
-app.use('/ForgotPass', app1);
-
-const app2 = require('./Login');
-app.use('/Login', app2);
-
-const app3 = require('./Register'); 
-app.use('/api/Register', app3);
-
-const app4 = require('./Webcounter');
-app.use('/Webcounter', app4);
-
-// MongoDB Connection
-mongoose.connect('mongodb+srv://mminggming:mingming13@mmingg.dlq3d.mongodb.net/USERDATA')
-.then(() => {
-    console.log("Connected to MongoDB/USERDATA");
-})
-.catch(err => {
-    console.error("MongoDB connection error:", err);
-});
-
-// User Schema
-const userSchema = new mongoose.Schema({
-    Name: String,
-    Surname: String,
-    Sex: String,
-    Birthdate: Date,
-    Email: { type: String, unique: true },
-    Phone: String,
-    Username: { type: String, unique: true },
-    Password: String,
-}, { collection: 'Register' });
-
-const User = mongoose.model('User', userSchema);
 
 // Register Route
 app.post('/Register', [
@@ -187,38 +209,13 @@ app.post('/Register', [
     }
 });
 
-// Login Route
-app.post('/Login', async (req, res) => {
-    const { username, password } = req.body;
-
-    try {
-        const user = await User.findOne({ Username: username });
-
-        if (!user) {
-            return res.status(400).json({ message: 'Invalid username or password' });
-        }
-
-        const isMatch = await bcrypt.compare(password, user.Password);
-
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid username or password' });
-        }
-
-        req.session.user = user;
-        res.redirect('/Home');
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'An error occurred during login.' });
-    }
-});
-
 // Logout Route
 app.get('/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
             return res.status(500).json({ message: 'Error in logging out.' });
         }
-        res.redirect('/Login'); // Redirect to Login after logout
+        res.redirect('/Login');
     });
 });
 
@@ -245,9 +242,12 @@ app.get('/api/nowshowing', async (req, res) => {
     }
 });
 
-// Edit Profile Route
+// Edit Profile Route (Ensure you're sending EJS properly)
 app.get('/edit_profile', (req, res) => {
-    res.sendFile(path.join(__dirname, 'EditProfile.ejs'));
+    if (!req.session.user) {
+        return res.redirect('/Login?alert=not-logged-in');
+    }
+    res.sendFile(path.join(__dirname, 'public/EditProfile.html'));
 });
 
 // Start the server
