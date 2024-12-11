@@ -186,6 +186,8 @@ const nowShowingSchema = new mongoose.Schema({
     Synopsis: String,
     img: String, 
     Date: String,
+    Type: String,
+    Time: String
 }, { collection: 'NowShowing' });
 
 const NowShowing = mongoose.models.NowShowing || mongoose.model('NowShowing', nowShowingSchema);
