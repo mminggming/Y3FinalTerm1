@@ -271,6 +271,26 @@ app.get('/api/nowshowing', async (req, res) => {
     }
 });
 
+app.get('/movie-details/:title', async (req, res) => {
+    try {
+        const movie = await prisma.nowShowing.findUnique({
+            where: {
+                Title: req.params.title, // Assuming "Title" is the unique identifier
+            },
+        });
+
+        if (!movie) {
+            return res.status(404).send('Movie not found');
+        }
+
+        res.render('movie-details', { movie });
+    } catch (error) {
+        console.error("Error fetching movie details:", error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

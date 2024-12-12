@@ -27,7 +27,7 @@ model Register {
 
 model NowShowing {
   id      String  @id @default(auto()) @map("_id") @db.ObjectId
-  Title   String
+  Title   String @unique
   Synopsis String
   img     String
   Date    String
