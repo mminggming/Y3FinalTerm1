@@ -36,3 +36,11 @@ model NowShowing {
   Rate    Int
   Video   String
 }
+
+model Coupon {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  coupon_code         String   @unique 
+  discount_percentage String?
+  discount_amount     String?
+  expiration_date     DateTime
+}
