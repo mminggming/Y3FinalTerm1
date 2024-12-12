@@ -13,6 +13,8 @@ const router = express.Router();
 const app = express();
 const prisma = new PrismaClient();
 const PORT = 3000;
+const sgMail = require('@sendgrid/mail');
+const crypto = require('crypto');
 
 // Load environment variables
 dotenv.config();
@@ -125,7 +127,6 @@ app.get('/Home', (req, res) => {
     }
     res.sendFile(path.join(__dirname, 'public/Home.html'));
 });
-
 
 // Register route
 app.post('/Register', [
@@ -307,33 +308,6 @@ app.get('/logout', (req, res) => {
         res.redirect('/login');
     });
 });
-
-
-app.get('/get-discount', async (req, res) => {
- 
-    
-
-    try {
-        const {code} = req.query 
-        console.log('get-discount',code )
-        const coupon = await prisma.coupon.findFirst({
-            where: {
-                coupon_code: code, // Assuming "Title" is the unique identifier
-            },
-        });
-        console.log('coupon',coupon )
-        if(coupon){
-            return res.json(coupon);
-        }
-
-    } catch (error) {
-        console.error('Error updating profile:', error);
-        res.status(500).send('Internal Server Error');
-    }
-  });
-
-
-
 
 // Start the server
 app.listen(PORT, () => {
