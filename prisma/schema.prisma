@@ -43,3 +43,12 @@ model Coupon {
   discount_percentage String?
   discount_amount     String?
 }
+
+model BookingHistory {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  Seat         String   
+  Row          String
+  Time         String
+  Location     String
+  Movie        String
+}

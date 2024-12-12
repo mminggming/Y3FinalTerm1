@@ -421,6 +421,40 @@ app.get('/get-discount', async (req, res) => {
     }
 });
 
+  app.get('/booking-history', async (req, res) => {
+    try {
+        const {movie, location} = req.query 
+      // Find all booking history records
+      const bookings = await prisma.bookingHistory.findMany({
+        where: {
+            Movie: movie, // Assuming "Title" is the unique identifier
+            Location: location
+        },
+    });
+      console.log('bookings', bookings);
+  
+      // Send all bookings as JSON response to the client
+      return res.json(bookings);
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  });
+  
+
+  app.post('/booking-history', async (req, res) => {
+
+    try {
+        await prisma.bookingHistory.createMany({
+            data:req.body,
+        });
+
+        res.redirect('/Home');
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).send('Internal Server Error');
+    }
+  });
 app.post('/send-receipt', async (req, res) => {
     const userId = req.session.user.id; // Assuming `id` is stored in the session after login
 

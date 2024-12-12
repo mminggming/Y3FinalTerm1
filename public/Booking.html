@@ -159,24 +159,16 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarCollapse">
                     <ul class="navbar-nav ms-auto">
-                        <li class="nav-item"><a href="Home.html" class="nav-link">Home</a></li>
-                        <li class="nav-item"><a href="Cinema.html" class="nav-link">Cinema</a></li>
-                        <li class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" id="menuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Menu</a>
-                            <ul class="dropdown-menu" aria-labelledby="menuDropdown">
-                                <li><a class="dropdown-item" href="Booking.html">Booking</a></li>
-                                <li><a class="dropdown-item" href="Coupon.html">Coupon</a></li>
-                            </ul>
-                        </li>
+                        <li class="nav-item"><a href="Home.html" class="nav-link ">Home</a></li>
+                        <li class="nav-item"><a href="Coupon.html" class="nav-link">Coupon</a></li>
                         <li class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle" id="menuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Profile</a>
-                        <ul class="dropdown-menu" aria-labelledby="menuDropdown">
-                            <li><a class="dropdown-item" href="/edit_profile">Edit Profile</a></li>
-                            <li><a class="dropdown-item" href="Historybooking.html">Booking History</a></li>
-                        </ul>
+                            <ul class="dropdown-menu" aria-labelledby="menuDropdown">
+                                <li><a class="dropdown-item" href="/edit_profile">Edit Profile</a></li>
+                                <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                            </ul>
                         </li>
-                        <!-- <li class="nav-item"><a href="/edit_profile" class="nav-link">Profile</a></li> -->
-                        <li class="nav-item"><a href="/logout" class="nav-link">Logout</a> </li>
+                        
                     </ul>
                 </div>
             </div>
@@ -203,10 +195,10 @@
                             <label for="theatre" class="font-weight-bold text-black">Select Theatre</label>
                             <select id="theatre" class="form-control">
                                 <option value="">-- Select Theatre --</option>
-                                <option value="Siam paragon">The Emporium</option>
-                                <option value="Icon siam">Central World</option>
-                                <option value="Emquatier">Central Ladprao</option>
-                                <option value="Sukhumvit">Terminal 21 Asok</option>
+                                <option value="Siam paragon">Siam paragon</option>
+                                <option value="Icon siam">Icon siam</option>
+                                <option value="Emquatier">Emquatier</option>
+                                <option value="Sukhumvit">Sukhumvit</option>
                             </select>
                         </div>
                         <div class="col-md-4 d-flex align-items-end">
@@ -294,7 +286,19 @@
 
 
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
+        async function getBookings(movie, location) {
+            try {
+                const response = await fetch(`/booking-history?movie=${movie}&location=${location}`); // Make sure this endpoint returns JSON
+                if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+        document.addEventListener("DOMContentLoaded", async () => {
             const seatsContainer = document.getElementById("seatsContainer");
             const confirmButton = document.getElementById("confirmBooking");
             const totalPriceDisplay = document.getElementById("totalPrice");
@@ -306,40 +310,47 @@
     
             // Theater list to randomly choose from (1 to 5)
             const theaterList = [1, 2, 3, 4, 5];
+            const modalMovie = document.getElementById("modalMovie");
+            const modalTime = document.getElementById("modalTime");
+            const modalLocation = document.getElementById("modalLocation");
     
-            // Create seats dynamically
-            for (let i = 0; i < 100; i++) {
-                const seat = document.createElement("div");
-                seat.classList.add("seat");
-    
-                const column = i % 10;
-    
-                if (column === 4 || column === 5) {
-                    seat.classList.add("aisle");
-                    seat.style.backgroundColor = "lightgray";
-                    seat.style.pointerEvents = "none";
-                } else if (i < 50) {
-                    seat.classList.add("front");
-                    seat.dataset.price = frontSeatPrice;
-                    seat.dataset.row = Math.floor(i / 10) + 1;
-                    seat.dataset.seat = (i % 10) + 1;
-                } else {
-                    seat.classList.add("back");
-                    seat.dataset.price = backSeatPrice;
-                    seat.dataset.row = Math.floor(i / 10) + 1;
-                    seat.dataset.seat = (i % 10) + 1;
+            function renderSeats (myBookings) {
+                seatsContainer.innerHTML = '';
+                for (let i = 0; i < 100; i++) {
+                    const seat = document.createElement("div");
+                    seat.classList.add("seat");
+
+                    const rowNumber = Math.floor(i / 10) + 1;
+                    const seatNumber = (i % 10) + 1;
+                    const isBooked = myBookings.find(booking => booking.Seat == seatNumber && booking.Row == rowNumber);
+
+                    const column = i % 10;
+
+                    if (column === 4 || column === 5 || isBooked) {
+                        seat.classList.add("aisle");
+                        seat.style.backgroundColor = "lightgray";
+                        seat.style.pointerEvents = "none";
+                    } else if (i < 50) {
+                        seat.classList.add("front");
+                        seat.dataset.price = frontSeatPrice;
+                        seat.dataset.row = Math.floor(i / 10) + 1;
+                        seat.dataset.seat = (i % 10) + 1;
+                    } else {
+                        seat.classList.add("back");
+                        seat.dataset.price = backSeatPrice;
+                        seat.dataset.row = Math.floor(i / 10) + 1;
+                        seat.dataset.seat = (i % 10) + 1;
+                    }
+        
+                    if (i % 5 === 0 && !seat.classList.contains("aisle")) {
+                        seat.classList.add("reserved");
+                    } else if (!seat.classList.contains("aisle")) {
+                        seat.classList.add("available");
+                        seat.addEventListener("click", () => toggleSeatSelection(seat));
+                    }
+                    seatsContainer.appendChild(seat);
                 }
-    
-                if (i % 5 === 0 && !seat.classList.contains("aisle")) {
-                    seat.classList.add("reserved");
-                } else if (!seat.classList.contains("aisle")) {
-                    seat.classList.add("available");
-                    seat.addEventListener("click", () => toggleSeatSelection(seat));
-                }
-    
-                seatsContainer.appendChild(seat);
             }
-    
             function toggleSeatSelection(seat) {
                 seat.classList.toggle("selected");
                 seat.style.backgroundColor = seat.classList.contains("selected") ? "red" : "";
@@ -370,7 +381,7 @@
             const theatreSelect = document.getElementById("theatre");
             const timeButtonsContainer = document.getElementById("timeButtonsContainer");
     
-            searchButton.addEventListener("click", () => {
+            searchButton.addEventListener("click", async() => {
                 const selectedCinema = cinemaSelect.value;
                 const selectedTheatre = theatreSelect.value;
     
@@ -383,6 +394,8 @@
                     document.getElementById("randomTheater").textContent = randomTheater;
     
                     generateShowtimeButtons();
+                    const myBookings = await getBookings(selectedCinema, selectedTheatre);
+                    renderSeats(myBookings)
                 } else {
                     alert("Please select both cinema and theatre.");
                 }
@@ -408,13 +421,11 @@
             function getTotalAfterDiscount(price){
                 const promoCodeInput = document.getElementById("promoCode");
                 const value = promoCodeInput.value; // ดึงค่าจาก input
-                console.log(value, 'promoCodeInput', price);
                 fetch(`/get-discount?code=${value}`)
                 .then(response => response.json())
                 .then(data => {
                     let totalPrice = price
                     if(data.discount_amount && parseInt(price) > 0){
-                        console.log( parseInt(price), parseInt(data.discount_amount))
                         totalPrice = parseInt(price) - parseInt(data.discount_amount)
                     }
 
@@ -423,7 +434,6 @@
                         const discountPercentage = parseInt(data.discount_percentage); // สมมติว่าได้ค่ามาเป็นเปอร์เซ็นต์ เช่น 20 แทน 20%
                         const discountAmount = (originalPrice * discountPercentage) / 100; 
                         totalPrice = originalPrice - discountAmount;
-                        console.log(originalPrice, discountPercentage, discountAmount, totalPrice);
                     }
 
 
@@ -434,6 +444,25 @@
                     console.error('Error fetching data:', error);
                     });
 
+            }
+
+            function getSeatsList () {
+                // Get all <li> elements within the <ul>
+                const listItems = selectedSeatsList.querySelectorAll('li');
+
+                // Convert NodeList to array and map over each <li> to extract the data
+                return Array.from(listItems).map(li => {
+                    const text = li.textContent.trim(); // e.g., "Row: 1, Seat: 7"
+                    
+                    // Split by comma to separate row and seat parts
+                    const [rowPart, seatPart] = text.split(',');
+
+                    // Extract the numeric values after "Row:" and "Seat:"
+                    const row = rowPart.replace('Row:', '').trim();
+                    const seat = seatPart.replace('Seat:', '').trim();
+
+                    return { Row: row, Seat: seat };
+                });
             }
     
             // Validate booking on "Confirm Booking" button click
@@ -454,56 +483,93 @@
                 }
             });
     
-            document.getElementById('purchaseTicket').addEventListener('click', async () => {
-    const modalMovie = document.getElementById('modalMovie').textContent;
-    const modalTime = document.getElementById('modalTime').textContent;
-    const modalLocation = document.getElementById('modalLocation').textContent;
-    const modalTheater = document.getElementById('modalTheater').textContent;
-    const modalSeatList = Array.from(document.querySelectorAll('#modalSeatList li')).map(li => li.textContent);
-    const modalTotalPrice = document.getElementById('modalTotalPrice').textContent;
-
-    try {
-        // Send booking details to the backend
-        const response = await fetch('/send-receipt', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                movie: modalMovie,
-                time: modalTime,
-                location: modalLocation,
-                theater: modalTheater,
-                seats: modalSeatList,
-                totalPrice: modalTotalPrice,
-            }),
-        });
-
-        if (response.ok) {
-            alert('Receipt sent successfully!');
-            // Redirect to the homepage
-            window.location.href = '/Home';
-        } else {
-            const errorData = await response.json();
-            console.error('Error sending receipt:', errorData.message);
-            alert('Failed to send receipt. Please try again.');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred. Please try again.');
-    }
-});
-
-
-
+            const purchaseButton = document.getElementById("purchaseTicket");
+            purchaseButton.addEventListener("click", async () => {
+                const modalMovie = document.getElementById("modalMovie");
+                const modalTime = document.getElementById("modalTime");
+                const modalLocation = document.getElementById("modalLocation");
+                const modalTheater = document.getElementById("modalTheater");
+                const modalSeatList = document.getElementById("modalSeatList");
+                const modalTotalPrice = document.getElementById("modalTotalPrice");
     
+               
+                modalMovie.textContent = cinemaSelect.value;
+                modalTime.textContent = document.getElementById("showTime").textContent;
+                modalLocation.textContent = theatreSelect.value;
+    
+                // Get the random theater number and display it in the modal
+                modalTheater.textContent = document.getElementById("randomTheater").textContent;
+    
+                modalSeatList.innerHTML = selectedSeatsList.innerHTML;
+                modalTotalPrice.textContent = receiptTotalPrice.textContent;
+                getTotalAfterDiscount(receiptTotalPrice.textContent)
+                const seatsList = getSeatsList()
+                const movieDetails = {
+                    Movie: cinemaSelect.value,
+                    Time:document.getElementById("showTime").textContent,
+                    Location: theatreSelect.value
+                };
+                const mergedData = seatsList.map(seat => ({
+                    ...seat, 
+                    ...movieDetails 
+                }));
+
+                try {
+                    const response = await fetch('/booking-history', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(mergedData)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Server error: ${response.status}`);
+                    }
+                    window.location.href = '/Home';
+                } catch (error) {
+                    console.error('Error sending data:', error);
+                }
+
+            try {
+                // Send booking details to the backend
+                const response = await fetch('/send-receipt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        movie: modalMovie,
+                        time: modalTime,
+                        location: modalLocation,
+                        theater: modalTheater,
+                        seats: modalSeatList,
+                        totalPrice: modalTotalPrice,
+                    }),
+                });
+
+                if (response.ok) {
+                    alert('Receipt sent successfully!');
+                    // Redirect to the homepage
+                    window.location.href = '/Home';
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error sending receipt:', errorData.message);
+                    alert('Failed to send receipt. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
+            });
+
             document.querySelector(".modal-footer .btn-success").addEventListener("click", () => {
                 alert("Thank you! Your booking is complete.");
                 const modal = bootstrap.Modal.getInstance(document.getElementById("ticketModal"));
                 modal.hide();
                 resetBooking();
             });
-    
+        
             function resetBooking() {
                 document.querySelectorAll(".seat.selected").forEach(seat => {
                     seat.classList.remove("selected");
