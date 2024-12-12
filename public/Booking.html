@@ -454,28 +454,41 @@
                 }
             });
     
-            const purchaseButton = document.getElementById("purchaseTicket");
-            purchaseButton.addEventListener("click", () => {
-                const modalMovie = document.getElementById("modalMovie");
-                const modalTime = document.getElementById("modalTime");
-                const modalLocation = document.getElementById("modalLocation");
-                const modalTheater = document.getElementById("modalTheater");
-                const modalSeatList = document.getElementById("modalSeatList");
-                const modalTotalPrice = document.getElementById("modalTotalPrice");
-    
-               
-                modalMovie.textContent = cinemaSelect.value;
-                modalTime.textContent = document.getElementById("showTime").textContent;
-                modalLocation.textContent = theatreSelect.value;
-    
-                // Get the random theater number and display it in the modal
-                modalTheater.textContent = document.getElementById("randomTheater").textContent;
-    
-                modalSeatList.innerHTML = selectedSeatsList.innerHTML;
-                modalTotalPrice.textContent = receiptTotalPrice.textContent;
-                getTotalAfterDiscount(receiptTotalPrice.textContent)
-            
-            });
+            purchaseButton.addEventListener('click', async () => {
+    const modalMovie = document.getElementById('modalMovie').textContent;
+    const modalTime = document.getElementById('modalTime').textContent;
+    const modalLocation = document.getElementById('modalLocation').textContent;
+    const modalTheater = document.getElementById('modalTheater').textContent;
+    const modalSeatList = Array.from(document.querySelectorAll('#modalSeatList li')).map(li => li.textContent);
+    const modalTotalPrice = document.getElementById('modalTotalPrice').textContent;
+    const userEmail = "user@example.com"; // Replace this with the actual user's email (from backend/session)
+
+    try {
+        // Send booking details to the backend
+        await fetch('/send-receipt', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: userEmail,
+                movie: modalMovie,
+                time: modalTime,
+                location: modalLocation,
+                theater: modalTheater,
+                seats: modalSeatList,
+                totalPrice: modalTotalPrice,
+            }),
+        });
+
+        // Redirect to homepage
+        window.location.href = '/Home';
+    } catch (error) {
+        console.error('Error during receipt sending:', error);
+        alert('Failed to complete the purchase. Please try again.');
+    }
+});
+
     
             document.querySelector(".modal-footer .btn-success").addEventListener("click", () => {
                 alert("Thank you! Your booking is complete.");
