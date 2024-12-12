@@ -421,6 +421,59 @@ app.get('/get-discount', async (req, res) => {
     }
 });
 
+app.post('/send-receipt', async (req, res) => {
+    const userId = req.session.user.id; // Assuming `id` is stored in the session after login
+
+    try {
+        // Fetch user email from the database using the user ID
+        const user = await prisma.register.findUnique({
+            where: { id: userId }, // Adjust based on your schema
+            select: { Email: true }, // Fetch only the email field
+        });
+
+        if (!user || !user.Email) {
+            return res.status(404).json({ message: 'User email not found.' });
+        }
+
+        const { Email } = user; // Extract email
+        const { movie, time, location, theater, seats, totalPrice } = req.body;
+
+        // Configure nodemailer transporter
+        const transporter = nodemailer.createTransport({
+            service: 'Gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
+
+        // Email content
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: Email,
+            subject: 'Booking Receipt',
+            html: `
+                <h2>Booking Summary</h2>
+                <p><strong>Movie:</strong> ${movie}</p>
+                <p><strong>Time:</strong> ${time}</p>
+                <p><strong>Location:</strong> ${location}</p>
+                <p><strong>Theater:</strong> ${theater}</p>
+                <p><strong>Seats:</strong> ${seats.join(', ')}</p>
+                <p><strong>Total Price:</strong> ${totalPrice} THB</p>
+                <p>Thank you for booking with us!</p>
+            `,
+        };
+
+        // Send the email
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).json({ message: 'Receipt sent successfully!' });
+    } catch (error) {
+        console.error('Error sending email:', error);
+        res.status(500).json({ message: 'Failed to send receipt email.' });
+    }
+});
+
 
 // Start the server
 app.listen(PORT, () => {

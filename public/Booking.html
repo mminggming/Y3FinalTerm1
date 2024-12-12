@@ -454,24 +454,22 @@
                 }
             });
     
-            purchaseButton.addEventListener('click', async () => {
+            document.getElementById('purchaseTicket').addEventListener('click', async () => {
     const modalMovie = document.getElementById('modalMovie').textContent;
     const modalTime = document.getElementById('modalTime').textContent;
     const modalLocation = document.getElementById('modalLocation').textContent;
     const modalTheater = document.getElementById('modalTheater').textContent;
     const modalSeatList = Array.from(document.querySelectorAll('#modalSeatList li')).map(li => li.textContent);
     const modalTotalPrice = document.getElementById('modalTotalPrice').textContent;
-    const userEmail = "user@example.com"; // Replace this with the actual user's email (from backend/session)
 
     try {
         // Send booking details to the backend
-        await fetch('/send-receipt', {
+        const response = await fetch('/send-receipt', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                email: userEmail,
                 movie: modalMovie,
                 time: modalTime,
                 location: modalLocation,
@@ -481,13 +479,22 @@
             }),
         });
 
-        // Redirect to homepage
-        window.location.href = '/Home';
+        if (response.ok) {
+            alert('Receipt sent successfully!');
+            // Redirect to the homepage
+            window.location.href = '/Home';
+        } else {
+            const errorData = await response.json();
+            console.error('Error sending receipt:', errorData.message);
+            alert('Failed to send receipt. Please try again.');
+        }
     } catch (error) {
-        console.error('Error during receipt sending:', error);
-        alert('Failed to complete the purchase. Please try again.');
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
     }
 });
+
+
 
     
             document.querySelector(".modal-footer .btn-success").addEventListener("click", () => {
