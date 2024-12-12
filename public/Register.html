@@ -6,8 +6,8 @@
     <title>Register</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="public/css/main.css" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js"></script>
+
     <style>
         body {
             margin: 0;
@@ -60,20 +60,26 @@
             text-align: center;
             margin-top: 20px;
         }
+        #password-strength {
+            margin-top: 10px;
+        }
+        #strength-message {
+            font-weight: bold;
+        }
+        #suggestions {
+            color: gray;
+            font-size: 0.9em;
+        }
     </style>
-
-    
 </head>
 <body>
     <header>
-        <div class="container-fluid position-relative p-0">
-         
-        </div>
+        <div class="container-fluid position-relative p-0"></div>
     </header>
     <div class="main-container">
         <div class="login-card">
             <h2>Register</h2>
-            <form action="/Register" method="POST">
+            <form id="register-form" action="/Register" method="POST">
                 <div class="mb-3">
                     <label for="Name" class="form-label">Name</label>
                     <input type="text" class="form-control" id="Name" name="Name" required>
@@ -101,7 +107,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="Phone" class="form-label">Phone Number</label>
-                    <input type="Tel" class="form-control" id="Phone" name="Phone" pattern="\d{10}" placeholder="xxxxxxxxxx" maxlength="10" required>
+                    <input type="tel" class="form-control" id="Phone" name="Phone" pattern="\d{10}" placeholder="xxxxxxxxxx" maxlength="10" required>
                 </div>
                 <div class="mb-3">
                     <label for="Username" class="form-label">Username</label>
@@ -110,6 +116,10 @@
                 <div class="mb-3">
                     <label for="Password" class="form-label">Password</label>
                     <input type="password" class="form-control" id="Password" name="Password" required>
+                    <div id="password-strength">
+                        <p id="strength-message"></p>
+                        <ul id="suggestions"></ul>
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label for="RecheckPassword" class="form-label">Recheck Password</label>
@@ -119,6 +129,59 @@
             </form>
         </div>
     </div>
+
+    <script>
+        const passwordInput = document.getElementById('Password');
+        const recheckPasswordInput = document.getElementById('RecheckPassword');
+        const strengthMessage = document.getElementById('strength-message');
+        const suggestionsList = document.getElementById('suggestions');
+        const registerForm = document.getElementById('register-form');
+
+        passwordInput.addEventListener('input', () => {
+            const password = passwordInput.value;
+            const result = zxcvbn(password);
+
+            // Update strength message
+            const strengthLevels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
+            strengthMessage.textContent = `Strength: ${strengthLevels[result.score]}`;
+
+            // Change color based on strength
+            const colors = ['red', 'orange', 'yellow', 'blue', 'green'];
+            strengthMessage.style.color = colors[result.score];
+
+            // Update suggestions
+            suggestionsList.innerHTML = '';
+            if (result.feedback.suggestions.length > 0) {
+                result.feedback.suggestions.forEach(suggestion => {
+                    const li = document.createElement('li');
+                    li.textContent = suggestion;
+                    suggestionsList.appendChild(li);
+                });
+            }
+        });
+
+        registerForm.addEventListener('submit', (event) => {
+            const password = passwordInput.value;
+            const recheckPassword = recheckPasswordInput.value;
+
+            // Check password requirements manually
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasDigit = /[0-9]/.test(password);
+            const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+            if (!hasUpperCase || !hasDigit || !hasSymbol) {
+                event.preventDefault();
+                alert('Password must include at least one uppercase letter, one digit, and one special character.');
+                return;
+            }
+
+            // Check if passwords match
+            if (password !== recheckPassword) {
+                event.preventDefault();
+                alert('Passwords do not match.');
+                return;
+            }
+        });
+    </script>
 </body>
-<script> src="/Register.js"</script>
 </html>
