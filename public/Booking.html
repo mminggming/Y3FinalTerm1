@@ -185,6 +185,7 @@
                             <label for="cinema" class="font-weight-bold text-black">Select Cinema</label>
                             <select id="cinema" class="form-control">
                                 <option value="">-- Select Cinema --</option>
+                                <option value="Wicked">Wicked</option>
                                 <option value="Redone">Redone</option>
                                 <option value="Gladiator II">Gladiator II</option>
                                 <option value="Moana2">Moana2</option>
@@ -199,6 +200,7 @@
                                 <option value="Icon siam">Icon siam</option>
                                 <option value="Emquatier">Emquatier</option>
                                 <option value="Sukhumvit">Sukhumvit</option>
+                                <option value="Sukhumvit">Terminal</option>
                             </select>
                         </div>
                         <div class="col-md-4 d-flex align-items-end">
@@ -240,7 +242,7 @@
     <div class="receipt-container">
         <h5>Booking Summary</h5>
         <div class="movie-info">
-            <!-- <img src="./images/wicked.jpeg" alt="Movie Poster" class="movie-poster"> -->
+            <p><strong>Select:</strong><span id="movie-title"></span></p>
             <p><strong>Movie:</strong> <span id="receiptMovie">-</span></p>
             <p><strong>Time:</strong> <span id="showTime">-</span></p>
             <p><strong>Location:</strong> <span id="location">-</span></p>
@@ -283,6 +285,21 @@
             </div>
         </div>
     </div>
+
+    
+    <script>
+        // ดึงข้อมูลชื่อภาพยนตร์จาก URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const movieTitle = urlParams.get('movie') || "No movie selected";
+    
+        // ตั้งค่าชื่อภาพยนตร์ในทั้งสอง span
+        document.getElementById('movie-title').textContent = movieTitle;
+        document.getElementById('receiptMovie').textContent = movieTitle;
+    
+        // ตั้งค่าใน modal ด้วย
+        document.getElementById('modalMovie').textContent = movieTitle;
+    </script>
+    
 
 
     <script>
