@@ -117,6 +117,7 @@
                     <label for="password" class="form-label">Password</label>
                     <input type="password" name="password" id="password" required class="form-control">
                 </div>
+                <div class="text-danger mb-3" ><%= message || '' %></div>
                 <button type="submit" class="btn btn-primary w-100">Login</button>
             </form>          
             <a href="/auth/google" class="btn btn-danger w-100">Login with Google</a>

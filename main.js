@@ -110,7 +110,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/Login.html'));
+    res.render('login', {message: ""});
     
 });
 
@@ -121,7 +121,7 @@ app.get('/Register', (req, res) => {
 app.get('/Home', (req, res) => {
     console.log("User Session:", req.session.user);  // Check user session
     if (!req.session.user) {
-        return res.redirect('/login?alert=not-logged-in');
+        return res.redirect('/login');
     }
     res.sendFile(path.join(__dirname, 'public/Home.html'));
 });
@@ -190,14 +190,19 @@ app.post('/Login', async (req, res) => {
         });
 
         if (!user) {
-            return res.redirect('/login?alert=invalid-username');
+            return   res.render("login", {
+                message: "ชื่อหรือรหัสผ่านไม่ถูกต้อง หากยังไม่เคยใช้งาน สมัครสมาชิกก่อน",
+            });
+
         }
 
         // Compare the provided password with the hashed Password in the database
         const isMatch = await bcrypt.compare(password, user.Password); // Match Prisma schema field "Password"
 
         if (!isMatch) {
-            return res.redirect('/login?alert=invalid-password');
+            return   res.render("login", {
+                message: "ชื่อหรือรหัสผ่านไม่ถูกต้อง",
+            });
         }
 
         // Save the user in the session
@@ -212,7 +217,7 @@ app.post('/Login', async (req, res) => {
 
 app.get('/edit_profile', async (req, res) => {
     if (!req.session.user) {
-        return res.redirect('/login?alert=not-logged-in');
+        return res.redirect('/Login');
     }
 
     try {
@@ -236,7 +241,7 @@ app.get('/edit_profile', async (req, res) => {
 // Edit profile route with Prisma
 app.post('/edit_profile', async (req, res) => {
     if (!req.session.user) {
-        return res.redirect('/login?alert=not-logged-in');
+        return res.redirect('/login');
     }
 
     try {
@@ -306,9 +311,7 @@ app.get('/logout', (req, res) => {
 
 app.get('/get-discount', async (req, res) => {
  
-    // if (!req.session.user) {
-    //     return res.redirect('/login?alert=not-logged-in');
-    // }
+    
 
     try {
         const {code} = req.query 
