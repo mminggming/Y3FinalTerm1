@@ -393,6 +393,37 @@
                     timeButtonsContainer.appendChild(button);
                 });
             }
+
+            function getTotalAfterDiscount(price){
+                const promoCodeInput = document.getElementById("promoCode");
+                const value = promoCodeInput.value; // ดึงค่าจาก input
+                console.log(value, 'promoCodeInput', price);
+                fetch(`/get-discount?code=${value}`)
+                .then(response => response.json())
+                .then(data => {
+                    let totalPrice = price
+                    if(data.discount_amount && parseInt(price) > 0){
+                        console.log( parseInt(price), parseInt(data.discount_amount))
+                        totalPrice = parseInt(price) - parseInt(data.discount_amount)
+                    }
+
+                    if (data.discount_percentage && parseInt(price) > 0) {
+                        const originalPrice = parseInt(price);
+                        const discountPercentage = parseInt(data.discount_percentage); // สมมติว่าได้ค่ามาเป็นเปอร์เซ็นต์ เช่น 20 แทน 20%
+                        const discountAmount = (originalPrice * discountPercentage) / 100; 
+                        totalPrice = originalPrice - discountAmount;
+                        console.log(originalPrice, discountPercentage, discountAmount, totalPrice);
+                    }
+
+
+                    receiptTotalPrice.textContent = totalPrice;
+                    modalTotalPrice.textContent = totalPrice;
+                    })
+                    .catch(error => {
+                    console.error('Error fetching data:', error);
+                    });
+
+            }
     
             // Validate booking on "Confirm Booking" button click
             confirmButton.addEventListener("click", () => {
@@ -421,6 +452,7 @@
                 const modalSeatList = document.getElementById("modalSeatList");
                 const modalTotalPrice = document.getElementById("modalTotalPrice");
     
+               
                 modalMovie.textContent = cinemaSelect.value;
                 modalTime.textContent = document.getElementById("showTime").textContent;
                 modalLocation.textContent = theatreSelect.value;
@@ -430,6 +462,8 @@
     
                 modalSeatList.innerHTML = selectedSeatsList.innerHTML;
                 modalTotalPrice.textContent = receiptTotalPrice.textContent;
+                getTotalAfterDiscount(receiptTotalPrice.textContent)
+            
             });
     
             document.querySelector(".modal-footer .btn-success").addEventListener("click", () => {

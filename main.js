@@ -303,6 +303,35 @@ app.get('/logout', (req, res) => {
     });
 });
 
+
+app.get('/get-discount', async (req, res) => {
+ 
+    // if (!req.session.user) {
+    //     return res.redirect('/login?alert=not-logged-in');
+    // }
+
+    try {
+        const {code} = req.query 
+        console.log('get-discount',code )
+        const coupon = await prisma.coupon.findFirst({
+            where: {
+                coupon_code: code, // Assuming "Title" is the unique identifier
+            },
+        });
+        console.log('coupon',coupon )
+        if(coupon){
+            return res.json(coupon);
+        }
+
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).send('Internal Server Error');
+    }
+  });
+
+
+
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
