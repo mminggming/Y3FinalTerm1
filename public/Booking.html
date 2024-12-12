@@ -168,7 +168,14 @@
                                 <li><a class="dropdown-item" href="Coupon.html">Coupon</a></li>
                             </ul>
                         </li>
-                        <li class="nav-item"><a href="/edit_profile" class="nav-link">Profile</a></li>
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" id="menuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Profile</a>
+                        <ul class="dropdown-menu" aria-labelledby="menuDropdown">
+                            <li><a class="dropdown-item" href="/edit_profile">Edit Profile</a></li>
+                            <li><a class="dropdown-item" href="Historybooking.html">Booking History</a></li>
+                        </ul>
+                        </li>
+                        <!-- <li class="nav-item"><a href="/edit_profile" class="nav-link">Profile</a></li> -->
                         <li class="nav-item"><a href="/logout" class="nav-link">Logout</a> </li>
                     </ul>
                 </div>
@@ -274,9 +281,13 @@
                     <ul id="modalSeatList"></ul>
                     <p><strong>Total Price:</strong> <span id="modalTotalPrice">0</span> THB</p>
                 </div>
+                <!-- <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div> -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
+                    <button type="button" class="btn btn-primary" id="confirmTicket">Confirm</button>
+                </div>                
             </div>
         </div>
     </div>
@@ -485,6 +496,22 @@
                 document.getElementById("randomTheater").textContent = "-"; // Reset random theater
             }
         });
+
+        document.getElementById("purchaseTicket").addEventListener("click", async () => {
+        await saveBooking(bookingData);
+        // ไปที่หน้าประวัติการจอง
+        window.location.href = "/booking-history.html";
+        });
+
+        document.getElementById("confirmTicket").addEventListener("click", () => {
+        alert("Ticket confirmed!");
+        // สามารถเพิ่มฟังก์ชันบันทึกข้อมูลหรือทำงานเพิ่มเติมได้
+        const modal = bootstrap.Modal.getInstance(document.getElementById("ticketModal"));
+        modal.hide();
+        resetBooking(); // รีเซ็ตข้อมูลการจองหลังยืนยัน
+    });
+
+
     </script>
     
     <br>  

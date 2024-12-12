@@ -410,6 +410,17 @@ app.get('/get-discount', async (req, res) => {
     }
   });
 
+  app.get('/api/get-booking-history', async (req, res) => {
+    try {
+        const userId = req.session.userId; // สมมติว่ามี session เก็บ userId
+        const bookings = await BookingCollection.find({ userId }).toArray(); // ดึงข้อมูลจาก MongoDB
+        res.json(bookings);
+    } catch (error) {
+        console.error('Error fetching booking history:', error);
+        res.status(500).json({ error: 'Failed to fetch booking history' });
+    }
+});
+
 
 // Start the server
 app.listen(PORT, () => {
