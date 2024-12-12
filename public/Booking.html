@@ -273,9 +273,13 @@
                     <ul id="modalSeatList"></ul>
                     <p><strong>Total Price:</strong> <span id="modalTotalPrice">0</span> THB</p>
                 </div>
+                <!-- <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div> -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
+                    <button type="button" class="btn btn-primary" id="confirmTicket">Confirm</button>
+                </div>                
             </div>
         </div>
     </div>
@@ -526,8 +530,39 @@
                 } catch (error) {
                     console.error('Error sending data:', error);
                 }
+
+            try {
+                // Send booking details to the backend
+                const response = await fetch('/send-receipt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        movie: modalMovie,
+                        time: modalTime,
+                        location: modalLocation,
+                        theater: modalTheater,
+                        seats: modalSeatList,
+                        totalPrice: modalTotalPrice,
+                    }),
+                });
+
+                if (response.ok) {
+                    alert('Receipt sent successfully!');
+                    // Redirect to the homepage
+                    window.location.href = '/Home';
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error sending receipt:', errorData.message);
+                    alert('Failed to send receipt. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
             });
-        
+
             document.querySelector(".modal-footer .btn-success").addEventListener("click", () => {
                 alert("Thank you! Your booking is complete.");
                 const modal = bootstrap.Modal.getInstance(document.getElementById("ticketModal"));
@@ -547,6 +582,22 @@
                 document.getElementById("randomTheater").textContent = "-"; // Reset random theater
             }
         });
+
+        document.getElementById("purchaseTicket").addEventListener("click", async () => {
+        await saveBooking(bookingData);
+        // ไปที่หน้าประวัติการจอง
+        window.location.href = "/booking-history.html";
+        });
+
+        document.getElementById("confirmTicket").addEventListener("click", () => {
+        alert("Ticket confirmed!");
+        // สามารถเพิ่มฟังก์ชันบันทึกข้อมูลหรือทำงานเพิ่มเติมได้
+        const modal = bootstrap.Modal.getInstance(document.getElementById("ticketModal"));
+        modal.hide();
+        resetBooking(); // รีเซ็ตข้อมูลการจองหลังยืนยัน
+    });
+
+
     </script>
     
     <br>  

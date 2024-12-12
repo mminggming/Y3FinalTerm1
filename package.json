@@ -21,6 +21,7 @@
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "debug": "^4.3.4",
     "dotenv": "^16.4.7",
     "ejs": "^3.1.10",
@@ -35,7 +36,8 @@
     "nodemailer-smtp-transport": "^2.7.4",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
-    "supports-color": "^8.1.1"
+    "supports-color": "^8.1.1",
+    "zxcvbn": "^4.4.2"
   },
   "keywords": [],
   "description": ""

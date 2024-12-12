@@ -13,6 +13,8 @@ const router = express.Router();
 const app = express();
 const prisma = new PrismaClient();
 const PORT = 3000;
+const crypto = require('crypto');
+const argon2 = require('argon2');
 
 // Load environment variables
 dotenv.config();
@@ -110,8 +112,11 @@ app.get('/', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-    res.render('login', {message: ""});
-    
+    res.render('login', {message: ""}); 
+});
+
+app.get('/forgot-password', (req, res) => {
+    res.render('forgotpass', {message: ""}); 
 });
 
 app.get('/Register', (req, res) => {
@@ -126,8 +131,9 @@ app.get('/Home', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/Home.html'));
 });
 
-
 // Register route
+const zxcvbn = require('zxcvbn');
+
 app.post('/Register', [
     check('Name').notEmpty().withMessage('Name is required'),
     check('Surname').notEmpty().withMessage('Surname is required'),
@@ -135,7 +141,7 @@ app.post('/Register', [
     check('Phone')
         .isLength({ min: 10, max: 10 }).withMessage('Phone number must be exactly 10 digits')
         .isNumeric().withMessage('Phone number must contain only numbers'),
-    check('Password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+    check('Password').notEmpty().withMessage('Password is required'),
     check('Username').notEmpty().withMessage('Username is required')
 ], async (req, res) => {
     const errors = validationResult(req);
@@ -144,11 +150,14 @@ app.post('/Register', [
     }
 
     try {
+        const { Name, Surname, Email, Phone, Password, Username, Sex, Birthdate } = req.body;
+
+        // Check if email or username already exists
         const existingUser = await prisma.register.findFirst({
             where: {
                 OR: [
-                    { email: req.body.Email },
-                    { username: req.body.Username }
+                    { Email: Email },
+                    { Username: Username }
                 ],
             },
         });
@@ -157,18 +166,30 @@ app.post('/Register', [
             return res.status(400).json({ message: 'Email or Username already exists.' });
         }
 
-        const hashedPassword = await bcrypt.hash(req.body.Password, 10);
+        // Use zxcvbn to check password strength
+        const passwordStrength = zxcvbn(Password);
 
+        if (passwordStrength.score < 3) { // Score ranges from 0 to 4 (0 = weak, 4 = strong)
+            return res.status(400).json({
+                message: 'Password is too weak.',
+                suggestions: passwordStrength.feedback.suggestions, // Provide suggestions to the user
+            });
+        }
+
+        // Hash the password using Argon2
+        const hashedPassword = await argon2.hash(Password);
+
+        // Create the user in the database
         await prisma.register.create({
             data: {
-                name: req.body.Name,
-                surname: req.body.Surname,
-                sex: req.body.Sex,
-                birthdate: req.body.Birthdate ? new Date(req.body.Birthdate) : null,
-                email: req.body.Email,
-                phone: req.body.Phone,
-                username: req.body.Username,
-                password: hashedPassword,
+                Name: Name,
+                Surname: Surname,
+                Sex: Sex || "Unknown",
+                Birthdate: Birthdate ? new Date(Birthdate) : null,
+                Email: Email,
+                Phone: Phone,
+                Username: Username,
+                Password: hashedPassword,
             },
         });
 
@@ -179,33 +200,30 @@ app.post('/Register', [
     }
 });
 
+
 // Login route
 app.post('/Login', async (req, res) => {
     const { username, password } = req.body;
 
     try {
-        // Find the user by Username
         const user = await prisma.register.findUnique({
-            where: { Username: username }, // Match Prisma schema field "Username"
+            where: { Username: username },
         });
 
         if (!user) {
-            return   res.render("login", {
-                message: "ชื่อหรือรหัสผ่านไม่ถูกต้อง หากยังไม่เคยใช้งาน สมัครสมาชิกก่อน",
+            return res.render("login", {
+                message: "Invalid username or password. Please register if you haven't."
             });
-
         }
 
-        // Compare the provided password with the hashed Password in the database
-        const isMatch = await bcrypt.compare(password, user.Password); // Match Prisma schema field "Password"
+        const isMatch = await argon2.verify(user.Password, password);
 
         if (!isMatch) {
-            return   res.render("login", {
-                message: "ชื่อหรือรหัสผ่านไม่ถูกต้อง",
+            return res.render("login", {
+                message: "Invalid username or password."
             });
         }
 
-        // Save the user in the session
         req.session.user = user;
         res.redirect('/Home');
     } catch (error) {
@@ -213,7 +231,6 @@ app.post('/Login', async (req, res) => {
         res.status(500).json({ message: 'An error occurred during login.' });
     }
 });
-
 
 app.get('/edit_profile', async (req, res) => {
     if (!req.session.user) {
@@ -239,32 +256,42 @@ app.get('/edit_profile', async (req, res) => {
 
 
 // Edit profile route with Prisma
+// Edit profile route with Prisma
 app.post('/edit_profile', async (req, res) => {
     if (!req.session.user) {
         return res.redirect('/login');
     }
 
     try {
-        const { Birthdate, Password, ...otherFields } = req.body;
-        const hashedPassword = Password ? await bcrypt.hash(Password, 10) : null;
+        const { Password, Birthdate, ...otherFields } = req.body;
 
-        const updatedData = {
+        let updatedData = {
             ...otherFields,
-            Birthdate: Birthdate ? new Date(Birthdate) : null,
-            ...(hashedPassword && { Password: hashedPassword }),
+            Birthdate: Birthdate ? new Date(Birthdate) : null, // Handle empty or invalid Birthdate
         };
 
+        // If a new password is provided, hash it before updating
+        if (Password && Password.trim() !== '') {
+            const hashedPassword = await argon2.hash(Password);
+            updatedData.Password = hashedPassword;
+        }
+
+        // Update user data in the database
         const updatedUser = await prisma.register.update({
             where: { Email: req.session.user.Email },
             data: updatedData,
         });
+
+        // Update the session with the new user data
+        req.session.user = updatedUser;
 
         res.redirect('/Home');
     } catch (error) {
         console.error('Error updating profile:', error);
         res.status(500).send('Internal Server Error');
     }
-  });
+});
+
 
 
 // Fetch NowShowing data
@@ -308,6 +335,60 @@ app.get('/logout', (req, res) => {
     });
 });
 
+const nodemailer = require('nodemailer');
+
+// Forgot password route
+app.post('/forgot-password', async (req, res) => {
+    const { username } = req.body;
+
+    try {
+        if (!username) {
+            return res.status(400).json({ message: 'Username is required.' });
+        }
+
+        const user = await prisma.register.findUnique({
+            where: { Username: username },
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        const email = user.Email;
+
+        const temporaryPassword = crypto.randomBytes(4).toString('hex');
+        const hashedPassword = await argon2.hash(temporaryPassword);
+
+        await prisma.register.update({
+            where: { Username: username },
+            data: { Password: hashedPassword },
+        });
+
+        const transporter = nodemailer.createTransport({
+            service: 'Gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
+
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'Your New Temporary Password',
+            html: `<p>Your new temporary password is:</p>
+                   <p><strong>${temporaryPassword}</strong></p>
+                   <p>Please log in and change your password immediately.</p>`,
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).json({ message: 'A new temporary password has been sent to your email.' });
+    } catch (error) {
+        console.error('Error in forgot password route:', error);
+        res.status(500).json({ message: 'An error occurred.' });
+    }
+});
 
 app.get('/get-discount', async (req, res) => {
     try {
@@ -329,6 +410,16 @@ app.get('/get-discount', async (req, res) => {
     }
   });
 
+  app.get('/api/get-booking-history', async (req, res) => {
+    try {
+        const userId = req.session.userId; // สมมติว่ามี session เก็บ userId
+        const bookings = await BookingCollection.find({ userId }).toArray(); // ดึงข้อมูลจาก MongoDB
+        res.json(bookings);
+    } catch (error) {
+        console.error('Error fetching booking history:', error);
+        res.status(500).json({ error: 'Failed to fetch booking history' });
+    }
+});
 
   app.get('/booking-history', async (req, res) => {
     try {
@@ -364,6 +455,58 @@ app.get('/get-discount', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
   });
+app.post('/send-receipt', async (req, res) => {
+    const userId = req.session.user.id; // Assuming `id` is stored in the session after login
+
+    try {
+        // Fetch user email from the database using the user ID
+        const user = await prisma.register.findUnique({
+            where: { id: userId }, // Adjust based on your schema
+            select: { Email: true }, // Fetch only the email field
+        });
+
+        if (!user || !user.Email) {
+            return res.status(404).json({ message: 'User email not found.' });
+        }
+
+        const { Email } = user; // Extract email
+        const { movie, time, location, theater, seats, totalPrice } = req.body;
+
+        // Configure nodemailer transporter
+        const transporter = nodemailer.createTransport({
+            service: 'Gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
+
+        // Email content
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: Email,
+            subject: 'Booking Receipt',
+            html: `
+                <h2>Booking Summary</h2>
+                <p><strong>Movie:</strong> ${movie}</p>
+                <p><strong>Time:</strong> ${time}</p>
+                <p><strong>Location:</strong> ${location}</p>
+                <p><strong>Theater:</strong> ${theater}</p>
+                <p><strong>Seats:</strong> ${seats.join(', ')}</p>
+                <p><strong>Total Price:</strong> ${totalPrice} THB</p>
+                <p>Thank you for booking with us!</p>
+            `,
+        };
+
+        // Send the email
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).json({ message: 'Receipt sent successfully!' });
+    } catch (error) {
+        console.error('Error sending email:', error);
+        res.status(500).json({ message: 'Failed to send receipt email.' });
+    }
+});
 
 
 // Start the server
