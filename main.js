@@ -256,32 +256,42 @@ app.get('/edit_profile', async (req, res) => {
 
 
 // Edit profile route with Prisma
+// Edit profile route with Prisma
 app.post('/edit_profile', async (req, res) => {
     if (!req.session.user) {
         return res.redirect('/login');
     }
 
     try {
-        const { Birthdate, Password, ...otherFields } = req.body;
-        const hashedPassword = Password ? await bcrypt.hash(Password, 10) : null;
+        const { Password, Birthdate, ...otherFields } = req.body;
 
-        const updatedData = {
+        let updatedData = {
             ...otherFields,
-            Birthdate: Birthdate ? new Date(Birthdate) : null,
-            ...(hashedPassword && { Password: hashedPassword }),
+            Birthdate: Birthdate ? new Date(Birthdate) : null, // Handle empty or invalid Birthdate
         };
 
+        // If a new password is provided, hash it before updating
+        if (Password && Password.trim() !== '') {
+            const hashedPassword = await argon2.hash(Password);
+            updatedData.Password = hashedPassword;
+        }
+
+        // Update user data in the database
         const updatedUser = await prisma.register.update({
             where: { Email: req.session.user.Email },
             data: updatedData,
         });
+
+        // Update the session with the new user data
+        req.session.user = updatedUser;
 
         res.redirect('/Home');
     } catch (error) {
         console.error('Error updating profile:', error);
         res.status(500).send('Internal Server Error');
     }
-  });
+});
+
 
 
 // Fetch NowShowing data
