@@ -312,7 +312,6 @@
     
             function renderSeats (myBookings) {
                 seatsContainer.innerHTML = '';
-                console.log(myBookings, 'renderSeats')
                 for (let i = 0; i < 100; i++) {
                     const seat = document.createElement("div");
                     seat.classList.add("seat");
@@ -392,7 +391,6 @@
     
                     generateShowtimeButtons();
                     const myBookings = await getBookings(selectedCinema, selectedTheatre);
-                    console.log(myBookings, 'myBookings')
                     renderSeats(myBookings)
                 } else {
                     alert("Please select both cinema and theatre.");
@@ -419,13 +417,11 @@
             function getTotalAfterDiscount(price){
                 const promoCodeInput = document.getElementById("promoCode");
                 const value = promoCodeInput.value; // ดึงค่าจาก input
-                console.log(value, 'promoCodeInput', price);
                 fetch(`/get-discount?code=${value}`)
                 .then(response => response.json())
                 .then(data => {
                     let totalPrice = price
                     if(data.discount_amount && parseInt(price) > 0){
-                        console.log( parseInt(price), parseInt(data.discount_amount))
                         totalPrice = parseInt(price) - parseInt(data.discount_amount)
                     }
 
@@ -434,7 +430,6 @@
                         const discountPercentage = parseInt(data.discount_percentage); // สมมติว่าได้ค่ามาเป็นเปอร์เซ็นต์ เช่น 20 แทน 20%
                         const discountAmount = (originalPrice * discountPercentage) / 100; 
                         totalPrice = originalPrice - discountAmount;
-                        console.log(originalPrice, discountPercentage, discountAmount, totalPrice);
                     }
 
 
@@ -511,33 +506,23 @@
                     Location: theatreSelect.value
                 };
                 const mergedData = seatsList.map(seat => ({
-                    ...seat, // Include the existing seat properties
-                    ...movieDetails // Add the movie details to each seat object
+                    ...seat, 
+                    ...movieDetails 
                 }));
 
-                console.log(mergedData, 'mergedData')
                 try {
                     const response = await fetch('/booking-history', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(mergedData)
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(mergedData)
                     });
 
                     if (!response.ok) {
-                    throw new Error(`Server error: ${response.status}`);
+                        throw new Error(`Server error: ${response.status}`);
                     }
-
-                    // If the server redirects, fetch won't automatically follow on a SPA setup,
-                    // but if you are on a normal browser environment, it will handle a redirect.
-                    // You can also check the response to see if there's a new URL you need to navigate to.
-                    console.log('Data sent successfully.');
-
-                    // If your server responds with a redirect to `/Home`,
-                    // you could manually redirect the browser:
                     window.location.href = '/Home';
-
                 } catch (error) {
                     console.error('Error sending data:', error);
                 }

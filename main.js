@@ -358,7 +358,7 @@ app.get('/get-discount', async (req, res) => {
             data:req.body,
         });
 
-        // res.redirect('/Home');
+        res.redirect('/Home');
     } catch (error) {
         console.error('Error updating profile:', error);
         res.status(500).send('Internal Server Error');
