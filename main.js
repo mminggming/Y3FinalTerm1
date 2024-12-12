@@ -111,6 +111,7 @@ app.get('/', (req, res) => {
 
 app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/Login.html'));
+    
 });
 
 app.get('/Register', (req, res) => {
@@ -189,14 +190,14 @@ app.post('/Login', async (req, res) => {
         });
 
         if (!user) {
-            return res.status(400).json({ message: 'Invalid username' });
+            return res.redirect('/login?alert=invalid-username');
         }
 
         // Compare the provided password with the hashed Password in the database
         const isMatch = await bcrypt.compare(password, user.Password); // Match Prisma schema field "Password"
 
         if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid password' });
+            return res.redirect('/login?alert=invalid-password');
         }
 
         // Save the user in the session
@@ -207,6 +208,7 @@ app.post('/Login', async (req, res) => {
         res.status(500).json({ message: 'An error occurred during login.' });
     }
 });
+
 
 app.get('/edit_profile', async (req, res) => {
     if (!req.session.user) {
@@ -290,6 +292,16 @@ app.get('/movie-details/:title', async (req, res) => {
     }
 });
 
+// Logout route
+app.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Error logging out:', err);
+            return res.status(500).send('An error occurred during logout.');
+        }
+        res.redirect('/login');
+    });
+});
 
 // Start the server
 app.listen(PORT, () => {
