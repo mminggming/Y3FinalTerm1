@@ -42,6 +42,5 @@ model Coupon {
   coupon_code         String   @unique 
   discount_percentage String?
   discount_amount     String?
-  expiration_date     DateTime
 }
 
