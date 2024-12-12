@@ -190,6 +190,12 @@
                                 <option value="Gladiator II">Gladiator II</option>
                                 <option value="Moana2">Moana2</option>
                                 <option value="Myhero">Myhero</option>
+                                <option value="NCT DREAM Mystery Lab">NCT DREAM Mystery Lab</option>
+                                <option value="WAI NOOM 2544">WAI NOOM 2544</option>
+                                <option value="Gladiator II">Gladiator II</option>
+                                <option value="THE COLOR WITHIN">THE COLOR WITHIN</option>
+                                <option value="Venom : The Last Dance">Venom : The Last Dance</option>
+                                <option value="RM">RM RIGHT PERSON</option>
                             </select>
                         </div>
                         <div class="col-md-4">
@@ -234,7 +240,6 @@
                     <span>Total Price:</span>
                     <span id="totalPrice">0</span> THB
                 </div>
-                <button id="confirmBooking" class="btn btn-primary mt-3">Confirm Booking</button>
             </div>
         </div>
     </div>
@@ -290,7 +295,7 @@
     <script>
         // ดึงข้อมูลชื่อภาพยนตร์จาก URL
         const urlParams = new URLSearchParams(window.location.search);
-        const movieTitle = urlParams.get('movie') || "No movie selected";
+        const movieTitle = urlParams.get('movie') || "No Movie selected";
     
         // ตั้งค่าชื่อภาพยนตร์ในทั้งสอง span
         document.getElementById('movie-title').textContent = movieTitle;
@@ -481,24 +486,6 @@
                     return { Row: row, Seat: seat };
                 });
             }
-    
-            // Validate booking on "Confirm Booking" button click
-            confirmButton.addEventListener("click", () => {
-                const selectedSeats = document.querySelectorAll(".seat.selected");
-                const selectedCinema = cinemaSelect.value;
-                const selectedTheatre = theatreSelect.value;
-                const selectedTime = document.getElementById("showTime").textContent;
-    
-                if (!selectedSeats.length) {
-                    alert("Please select at least one seat.");
-                } else if (!selectedCinema || !selectedTheatre || !selectedTime) {
-                    alert("Please select a cinema, theatre, and showtime.");
-                } else {
-                    // Display the confirmation message
-                    alert("Booking confirmed! Next, you have to purchase ticket.");
-                    // Optionally, you can proceed to the next steps, like showing the payment modal
-                }
-            });
     
             const purchaseButton = document.getElementById("purchaseTicket");
             purchaseButton.addEventListener("click", async () => {
